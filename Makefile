@@ -6,8 +6,8 @@ DEBUG_CFLAGS = -g -Wall -DDEBUG -Iinclude
 # Source files
 SRC_DIR = src
 INCLUDE_DIR = include
-SOURCES = $(SRC_DIR)/autocomplete.c $(SRC_DIR)/trie.c $(SRC_DIR)/priority_queue.c
-OBJECTS = autocomplete.o trie.o priority_queue.o
+SOURCES = $(SRC_DIR)/autocomplete.c $(SRC_DIR)/trie.c
+OBJECTS = autocomplete.o trie.o
 
 # Default target
 all: autocomplete
@@ -27,8 +27,7 @@ autocomplete.o: $(SRC_DIR)/autocomplete.c $(INCLUDE_DIR)/trie.h
 trie.o: $(SRC_DIR)/trie.c $(INCLUDE_DIR)/trie.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/trie.c
 
-priority_queue.o: $(SRC_DIR)/priority_queue.c $(INCLUDE_DIR)/priority_queue.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/priority_queue.c
+# Removed priority_queue from build
 
 # Install target
 install: autocomplete
