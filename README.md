@@ -240,3 +240,6 @@ This version focuses on:
 🚀 **Experience intelligent command completion that learns and adapts to your workflow with blazing-fast performance!**
 
 Ready to supercharge your command line productivity!
+
+## To Implement 
+- Default bindings for left and right arrow keys for character and string navigation
