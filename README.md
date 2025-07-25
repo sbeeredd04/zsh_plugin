@@ -1,19 +1,31 @@
-# zsh_plugin (Hybrid Zsh+C Example)
+# Zsh Autocomplete Plugin (Hybrid Zsh+C)
 
-A hybrid Zsh+C plugin that inserts "Hello from C!" at the cursor when you press a keybinding. This demonstrates how to combine C's performance with Zsh's integration capabilities.
+A hybrid Zsh+C autocomplete plugin that provides command history navigation using up/down arrow keys with **real zsh history**. This demonstrates how to combine C's performance with Zsh's integration capabilities for enhanced command-line experience.
 
 ## Directory Structure
 ```
 zsh_plugin/
-├── hello.c          # C source code
-├── plugin.zsh       # Zsh widget and keybinding
-├── Makefile         # Build configuration
-├── hello            # Compiled binary (created after make)
-└── README.md        # This file
+├── autocomplete.c      # C source code for history processing
+├── plugin.zsh          # Zsh widget and keybinding logic
+├── Makefile           # Build configuration
+├── setup.sh           # Automatic setup script
+├── autocomplete       # Compiled binary (created after make)
+└── README.md          # This file
 ```
 
 ## Quick Start
 
+**Automatic Setup (Recommended):**
+```sh
+./setup.sh
+```
+This script will:
+- Build the C program
+- Backup your existing `.zshrc`
+- Add the plugin to your `.zshrc`
+- Test the installation
+
+**Manual Setup:**
 1. **Build the C program:**
    ```sh
    make
@@ -29,31 +41,59 @@ zsh_plugin/
    source ~/.zshrc
    ```
 
-4. **Test it:** Press `Ctrl-x Ctrl-h` at any command prompt to insert "Hello from C!"
-
 ## How It Works
 
-• The Zsh widget (`hello_widget`) executes the compiled C program
-• The C program's output is captured and inserted at the cursor position
-• The keybinding `Ctrl-x Ctrl-h` triggers the widget
-• You can pass shell variables like `$LBUFFER` to the C program for advanced features
+### Architecture
+- **Zsh widgets** capture up/down arrow key presses
+- **History extraction** uses `fc -l 1` to get full zsh command history
+- **C program** receives history via stdin and handles navigation logic
+- **Buffer replacement** updates the command line with selected history entry
+
+### Key Components
+
+1. **`autocomplete.c`**: 
+   - Receives: current buffer, direction (up/down), and full history via stdin
+   - Processes: up to 1000 history entries from zsh
+   - Returns: appropriate history command based on navigation direction
+
+2. **`plugin.zsh`**:
+   - `get_zsh_history()`: Extracts real zsh history using `fc` command
+   - Defines `autocomplete_up_widget()` and `autocomplete_down_widget()`
+   - Binds widgets to up/down arrow keys (`^[[A` and `^[[B`)
+   - Manages cursor positioning and buffer updates
+
+3. **Real History Integration**:
+   - Uses zsh's built-in `fc` command to access command history
+   - Processes the same history that zsh uses internally
+   - Supports up to 1000 recent commands
+   - Compatible with macOS and Linux
+
+## Usage
+
+- **↑ Arrow**: Navigate to previous/older commands in your actual zsh history
+- **↓ Arrow**: Navigate to next/newer commands in your actual zsh history
+- **Navigation**: Cycles through your real command history
+- **Buffer Update**: Replaces entire command line with selected history
+
+## Real History Features
+✅ **Uses your actual zsh history** - No demo data
+✅ **Same history as zsh** - Accesses via `fc` command
+✅ **Recent commands first** - History is reversed for intuitive navigation
+✅ **Cross-platform** - Works on macOS and Linux
+✅ **Fast processing** - C handles up to 1000 entries efficiently
 
 ## Testing
 
-Test the C program directly:
+**Test the C program with real history:**
 ```sh
-./hello
-# Output: Hello from C!
+fc -l 1 | awk '{$1=""; print substr($0,2)}' | tail -r | ./autocomplete "test" "up"
+fc -l 1 | awk '{$1=""; print substr($0,2)}' | tail -r | ./autocomplete "test" "down"
 ```
 
-Test the plugin integration:
-```sh
-# Source the plugin
-source /Users/sriujjwalreddyb/zsh_plugin/plugin.zsh
-
-# Press Ctrl-x Ctrl-h at your prompt
-# You should see "Hello from C!" inserted at cursor
-```
+**Test the plugin:**
+1. Source the plugin: `source plugin.zsh`
+2. Type any command (or leave blank)
+3. Press ↑/↓ arrows to navigate through your actual command history
 
 ## Development
 
@@ -67,54 +107,65 @@ make clean && make
 make clean
 ```
 
-## Extending the Plugin
-
-### Pass Buffer Context to C Program
-Modify the widget in `plugin.zsh`:
+**Quick test setup:**
 ```sh
-hello_widget() {
-  local output
-  output="$($ZSH_PLUGIN_BIN "$LBUFFER")"  # Pass current buffer
-  LBUFFER+="$output"
-}
+./setup.sh
 ```
 
-### Access Arguments in C
-In `hello.c`, use `argv[1]` to access the buffer:
-```c
-int main(int argc, char *argv[]) {
-    if (argc > 1) {
-        printf("Current buffer: %s\n", argv[1]);
-    }
-    printf("Hello from C!");
-    return 0;
-}
-```
+## Technical Details
 
-### Advanced Use Cases
-- **Command completion:** Implement trie data structures in C for fast lookups
-- **History analysis:** Process command history for intelligent suggestions  
-- **Text processing:** Use C for heavy string manipulation tasks
-- **System integration:** Call system APIs efficiently from C
+### History Processing
+- **Extraction**: `fc -l 1` gets full numbered history
+- **Cleaning**: `awk` removes line numbers, keeping only commands
+- **Ordering**: `tail -r` reverses for newest-first navigation
+- **Limits**: C program handles up to 1000 entries (configurable)
 
-## Keybinding Reference
+### Navigation Logic
+- **Up Arrow**: Move to older commands (increment index)
+- **Down Arrow**: Move to newer commands (decrement index)
+- **Circular**: Navigation wraps around at history boundaries
+- **State**: Each widget call processes fresh history
 
-- `Ctrl-x Ctrl-h` - Insert "Hello from C!" at cursor
-- Customize by changing `bindkey '^x^h'` in `plugin.zsh`
+## Advanced Features (Future)
+
+- **Smart filtering**: Match commands based on current buffer prefix
+- **Frequency-based sorting**: Most used commands first
+- **Context awareness**: Different history per directory
+- **Fuzzy matching**: Partial command completion
+- **Custom categories**: Group commands by type
+- **Persistent indexing**: Remember position across sessions
 
 ## Troubleshooting
 
 **Plugin not working?**
-- Ensure the binary is built: `ls -la hello`
-- Check plugin is sourced: `which hello_widget`
-- Verify keybinding: `bindkey | grep hello`
+- Run `./setup.sh` to ensure proper installation
+- Check binary exists: `ls -la autocomplete`
+- Verify plugin loaded: `which autocomplete_up_widget`
+- Test manually: `echo "test cmd" | ./autocomplete "buffer" "up"`
+
+**No history showing?**
+- Check zsh history: `fc -l 1 | head -5`
+- Verify history settings: `echo $HISTSIZE $SAVEHIST`
+- Test extraction: `fc -l 1 | awk '{$1=""; print substr($0,2)}' | tail -r | head -5`
+
+**Arrow keys not working?**
+- Check terminal type: `echo $TERM`
+- Try alternative bindings in `plugin.zsh`
+- Test key codes: `cat -v` (then press arrows)
 
 **Build errors?**
-- Check gcc is installed: `gcc --version`
-- Ensure make is available: `make --version`
+- Check gcc: `gcc --version`
+- Ensure make available: `make --version`
+- Check file permissions: `ls -la autocomplete.c`
+
+## Keybinding Reference
+
+- `↑` (Up Arrow) - Navigate to older commands in real history
+- `↓` (Down Arrow) - Navigate to newer commands in real history
+- Bindings: `^[[A`, `^[[B`, `^[OA`, `^[OB`
 
 ---
 
-🟢 **This is the simplest, most robust way to combine C performance with Zsh integration.**
+🟢 **Now using your real zsh command history for seamless navigation!**
 
-Ready to build more advanced features like intelligent autocompletion, command suggestions, or text processing tools!
+The plugin integrates with zsh's built-in history system, providing the same commands you see with the default history navigation, but with enhanced C-powered processing capabilities.
