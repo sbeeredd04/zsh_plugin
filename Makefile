@@ -1,15 +1,11 @@
 # Makefile
-ZSH = $(shell which zsh)
-ZSHMODDIR = $(shell $(ZSH) -c 'echo $$module_path[1]')
-CFLAGS = -fPIC -Wall -I$(ZSH)/../include
+CC = gcc
+CFLAGS = -O2
 
-all: zsh_plugin.so
+all: hello
 
-zsh_plugin.so: zsh_plugin.c
-	$(CC) $(CFLAGS) -shared -o $@ $<
-
-install:
-	cp zsh_plugin.so $(ZSHMODDIR)
+hello: hello.c
+	$(CC) $(CFLAGS) -o hello hello.c
 
 clean:
-	rm -f zsh_plugin.so 
+	rm -f hello 

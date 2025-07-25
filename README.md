@@ -1,43 +1,120 @@
-# zsh_plugin
+# zsh_plugin (Hybrid Zsh+C Example)
 
-A minimal Zsh C module that registers a ZLE widget.
+A hybrid Zsh+C plugin that inserts "Hello from C!" at the cursor when you press a keybinding. This demonstrates how to combine C's performance with Zsh's integration capabilities.
 
-## Build
-
-```sh
-make
+## Directory Structure
+```
+zsh_plugin/
+├── hello.c          # C source code
+├── plugin.zsh       # Zsh widget and keybinding
+├── Makefile         # Build configuration
+├── hello            # Compiled binary (created after make)
+└── README.md        # This file
 ```
 
-## Install
+## Quick Start
 
+1. **Build the C program:**
+   ```sh
+   make
+   ```
+
+2. **Add to your `.zshrc`:**
+   ```sh
+   source /Users/sriujjwalreddyb/zsh_plugin/plugin.zsh
+   ```
+
+3. **Reload your shell:**
+   ```sh
+   source ~/.zshrc
+   ```
+
+4. **Test it:** Press `Ctrl-x Ctrl-h` at any command prompt to insert "Hello from C!"
+
+## How It Works
+
+• The Zsh widget (`hello_widget`) executes the compiled C program
+• The C program's output is captured and inserted at the cursor position
+• The keybinding `Ctrl-x Ctrl-h` triggers the widget
+• You can pass shell variables like `$LBUFFER` to the C program for advanced features
+
+## Testing
+
+Test the C program directly:
 ```sh
-make install
+./hello
+# Output: Hello from C!
 ```
 
-Or copy `zsh_plugin.so` to a directory in your `$module_path`.
-
-## Usage
-
-Add to your `.zshrc`:
-
+Test the plugin integration:
 ```sh
-zmodload ./zsh_plugin.so
-zle -N zle-hello
-bindkey '^x^h' zle-hello  # Ctrl-x Ctrl-h to trigger
+# Source the plugin
+source /Users/sriujjwalreddyb/zsh_plugin/plugin.zsh
+
+# Press Ctrl-x Ctrl-h at your prompt
+# You should see "Hello from C!" inserted at cursor
 ```
 
-Restart your shell and press `Ctrl-x Ctrl-h` to insert "Hello from C!" at the cursor.
+## Development
 
-## Resources
+**Rebuild after changes:**
+```sh
+make clean && make
+```
 
-- [Zsh Modules Documentation](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html)
-- [Zsh Line Editor (ZLE)](https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html)
-- [zsh/example module](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fexample-Module)
+**Clean build artifacts:**
+```sh
+make clean
+```
 
-## How to Expand
+## Extending the Plugin
 
-- Implement your trie/history logic in C.
-- Register more ZLE widgets for navigation, ghost text, etc.
-- Use the ZLE API to read/modify the command line buffer.
+### Pass Buffer Context to C Program
+Modify the widget in `plugin.zsh`:
+```sh
+hello_widget() {
+  local output
+  output="$($ZSH_PLUGIN_BIN "$LBUFFER")"  # Pass current buffer
+  LBUFFER+="$output"
+}
+```
 
-**This setup will get you started with a working C-based Zsh plugin.**
+### Access Arguments in C
+In `hello.c`, use `argv[1]` to access the buffer:
+```c
+int main(int argc, char *argv[]) {
+    if (argc > 1) {
+        printf("Current buffer: %s\n", argv[1]);
+    }
+    printf("Hello from C!");
+    return 0;
+}
+```
+
+### Advanced Use Cases
+- **Command completion:** Implement trie data structures in C for fast lookups
+- **History analysis:** Process command history for intelligent suggestions  
+- **Text processing:** Use C for heavy string manipulation tasks
+- **System integration:** Call system APIs efficiently from C
+
+## Keybinding Reference
+
+- `Ctrl-x Ctrl-h` - Insert "Hello from C!" at cursor
+- Customize by changing `bindkey '^x^h'` in `plugin.zsh`
+
+## Troubleshooting
+
+**Plugin not working?**
+- Ensure the binary is built: `ls -la hello`
+- Check plugin is sourced: `which hello_widget`
+- Verify keybinding: `bindkey | grep hello`
+
+**Build errors?**
+- Check gcc is installed: `gcc --version`
+- Ensure make is available: `make --version`
+
+---
+
+🟢 **This is the simplest, most robust way to combine C performance with Zsh integration.**
+
+Ready to build more advanced features like intelligent autocompletion, command suggestions, or text processing tools!
