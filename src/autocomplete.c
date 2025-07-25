@@ -31,7 +31,7 @@ int load_history_from_stdin(void);
 void save_trie_to_file(void);
 void load_trie_from_file(void);
 char* get_ghost_text(const char* prefix);
-char* navigate_filtered_history(const char* prefix, const char* direction, int* new_index);
+static char* navigate_filtered_history(const char* prefix, const char* direction, int start_index, int* new_index);
 void update_command_usage(const char* command);
 void filter_history_by_prefix(const char* prefix);
 
@@ -260,35 +260,38 @@ char* get_ghost_text(const char* prefix) {
 }
 
 // Navigate through filtered history based on prefix
-char* navigate_filtered_history(const char* prefix, const char* direction, int* new_index) {
-    // If prefix is empty, show all history
+char* navigate_filtered_history(const char* prefix, const char* direction, int start_index, int* new_index) {
+    // Build filtered history every call (stateless between processes)
     const char* effective_prefix = (prefix && strlen(prefix) > 0) ? prefix : "";
-    if (!current_prefix || strcmp(current_prefix, effective_prefix) != 0) {
-        if (current_prefix) free(current_prefix);
-        current_prefix = strdup(effective_prefix);
-        filter_history_by_prefix(effective_prefix);
-        current_position = -1;  // Start before first item
-    }
+    filter_history_by_prefix(effective_prefix);
+
     if (filtered_count == 0) {
         *new_index = 0;
-        return strdup(prefix);  // Return original if no matches
+        return strdup(prefix); // No matches, return original
     }
+
+    int idx = start_index;
     if (strcmp(direction, "up") == 0) {
-        current_position++;
-        if (current_position >= filtered_count) {
-            current_position = -1;  // Wrap to original
-        }
+        idx++;
     } else if (strcmp(direction, "down") == 0) {
-        current_position--;
-        if (current_position < -1) {
-            current_position = filtered_count - 1;  // Wrap to last
-        }
+        idx--;
     }
-    *new_index = current_position;
-    if (current_position == -1) {
+
+    // Wrap behaviour: -1 represents the original (unmodified) buffer
+    if (idx >= filtered_count) {
+        idx = -1;
+    } else if (idx < -1) {
+        idx = filtered_count - 1;
+    }
+
+    *new_index = idx;
+
+    if (idx == -1) {
         return strdup(prefix);
     } else {
-        return strdup(filtered_history[current_position]);
+        int actual_idx = filtered_count - 1 - idx; // Map to newest-to-oldest order
+        if (actual_idx < 0 || actual_idx >= filtered_count) actual_idx = 0;
+        return strdup(filtered_history[actual_idx]);
     }
 }
 
@@ -390,8 +393,13 @@ int main(int argc, char *argv[]) {
         }
     } else if (strcmp(operation, "history") == 0) {
         // Navigate filtered history
+        const char* direction = param3;
+        int start_index = 0;
+        if (argc > 4) {
+            start_index = atoi(argv[4]);
+        }
         int new_index;
-        result = navigate_filtered_history(current_buffer, param3, &new_index);
+        result = navigate_filtered_history(current_buffer, direction, start_index, &new_index);
         if (result) {
             printf("%s|%d", result, new_index);
         }
