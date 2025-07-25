@@ -93,17 +93,10 @@ autocomplete_up_widget() {
         local output="${result%|*}"
         local new_index="${result##*|}"
         ZSH_HISTORY_INDEX="$new_index"
-
-        # Compute ghost text (output minus current prefix)
-        if [[ "$output" == "$current_buffer"* ]]; then
-            local suggestion="${output#$current_buffer}"
-            ZSH_GHOST_TEXT="$suggestion"
-        else
-            ZSH_GHOST_TEXT=""
-        fi
-
-        # Keep buffer unchanged; cursor at end of prefix
+        LBUFFER="$output"
+        RBUFFER=""
         CURSOR=${#LBUFFER}
+        ZSH_GHOST_TEXT=""
     else
         zle up-line-or-history
     fi
@@ -125,16 +118,10 @@ autocomplete_down_widget() {
         local output="${result%|*}"
         local new_index="${result##*|}"
         ZSH_HISTORY_INDEX="$new_index"
-
-        # Compute ghost text suggestion
-        if [[ "$output" == "$current_buffer"* ]]; then
-            local suggestion="${output#$current_buffer}"
-            ZSH_GHOST_TEXT="$suggestion"
-        else
-            ZSH_GHOST_TEXT=""
-        fi
-
+        LBUFFER="$output"
+        RBUFFER=""
         CURSOR=${#LBUFFER}
+        ZSH_GHOST_TEXT=""
     else
         zle down-line-or-history
     fi
