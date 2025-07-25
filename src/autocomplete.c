@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include "../include/trie.h"
+#include <sys/types.h>
+#include <limits.h>
 
 // Global data structures
 static Trie* command_trie = NULL;
@@ -19,9 +21,100 @@ static int current_position = 0;
 static bool is_initialized = false;
 
 // Persistent storage paths
-#define DATA_DIR "data"
-#define TRIE_DATA_FILE "data/trie_data.txt"
-#define HISTORY_FILE "data/history_cache.txt"
+// #define DATA_DIR "data"
+// #define TRIE_DATA_FILE "data/trie_data.txt"
+
+// Cache paths
+static char CACHE_DIR[PATH_MAX];
+static char TRIE_DATA_FILE[PATH_MAX];
+
+static void init_storage_paths(void) {
+    const char *xdg = getenv("XDG_CACHE_HOME");
+    if (!xdg || *xdg=='\0') {
+        const char *home = getenv("HOME");
+        snprintf(CACHE_DIR, sizeof(CACHE_DIR), "%s/.cache/zsh-autocomplete", home);
+    } else {
+        snprintf(CACHE_DIR, sizeof(CACHE_DIR), "%s/zsh-autocomplete", xdg);
+    }
+    snprintf(TRIE_DATA_FILE, sizeof(TRIE_DATA_FILE), "%s/trie_data.txt", CACHE_DIR);
+}
+
+static void ensure_data_directory(void) {
+    struct stat st = {0};
+    if (stat(CACHE_DIR, &st)==-1) {
+        mkdir(CACHE_DIR, 0700);
+    }
+}
+
+// Helper: find the trie node for a full command
+static TrieNode* trie_find_node(Trie *t, const char *cmd) {
+    TrieNode *cur = t->root;
+    for (size_t i=0; i<strlen(cmd); i++) {
+        unsigned char idx = (unsigned char)cmd[i];
+        if (idx>=ALPHABET_SIZE || !cur->children[idx]) return NULL;
+        cur = cur->children[idx];
+    }
+    return cur->is_end_of_word ? cur : NULL;
+}
+
+// Save trie + metadata to disk as "cmd|freq|last_used" lines
+void save_trie_to_file(void) {
+    if (!command_trie) return;
+    init_storage_paths();
+    ensure_data_directory();
+    FILE *f = fopen(TRIE_DATA_FILE, "w");
+    if (!f) return;
+
+    for (int i=0; i<history_count; i++) {
+        const char *cmd = history_array[i];
+        TrieNode *node = trie_find_node(command_trie, cmd);
+        int freq = node ? node->frequency : 1;
+        long ts   = node ? node->last_used : time(NULL);
+        fprintf(f, "%s|%d|%ld\n", cmd, freq, ts);
+    }
+    fclose(f);
+}
+
+// Load saved trie entries with their freq & timestamp; rebuild history_array
+void load_trie_from_file(void) {
+    init_storage_paths();
+    FILE *f = fopen(TRIE_DATA_FILE, "r");
+    if (!f) return;
+
+    // clear existing
+    if (history_array) {
+        for (int i=0; i<history_count; i++) free(history_array[i]);
+        free(history_array);
+    }
+    history_array = NULL;
+    history_count = 0;
+
+    size_t cap = 128;
+    history_array = malloc(cap * sizeof(char*));
+    char line[4096];
+    while (fgets(line, sizeof(line), f)) {
+        char *nl = strchr(line,'\n'); if(nl)*nl='\0';
+        if (!*line) continue;
+        char *cmd      = strtok(line,"|");
+        char *freq_str = strtok(NULL,"|");
+        char *ts_str   = strtok(NULL,"|");
+        if (!cmd) continue;
+
+        trie_insert(command_trie, cmd);
+        TrieNode *node = trie_find_node(command_trie, cmd);
+        if (node && freq_str && ts_str) {
+            node->frequency = atoi(freq_str);
+            node->last_used = atol(ts_str);
+        }
+
+        if (history_count >= (int)cap) {
+            cap *= 2;
+            history_array = realloc(history_array, cap * sizeof(char*));
+        }
+        history_array[history_count++] = strdup(cmd);
+    }
+    fclose(f);
+}
 
 // Function prototypes
 static void initialize_autocomplete_from_stdin(void);
@@ -36,31 +129,31 @@ void update_command_usage(const char* command);
 void filter_history_by_prefix(const char* prefix);
 
 // Create data directory if it doesn't exist
-void ensure_data_directory(void) {
-    struct stat st = {0};
-    if (stat(DATA_DIR, &st) == -1) {
-        mkdir(DATA_DIR, 0700);
-    }
-}
+// void ensure_data_directory(void) {
+//     struct stat st = {0};
+//     if (stat(DATA_DIR, &st) == -1) {
+//         mkdir(DATA_DIR, 0700);
+//     }
+// }
 
 // Save trie data to persistent file
-void save_trie_to_file(void) {
-    if (!command_trie) return;
+// void save_trie_to_file(void) {
+//     if (!command_trie) return;
     
-    ensure_data_directory();
-    FILE* file = fopen(TRIE_DATA_FILE, "w");
-    if (!file) return;
+//     ensure_data_directory();
+//     FILE* file = fopen(TRIE_DATA_FILE, "w");
+//     if (!file) return;
     
-    // Save history array for easy reconstruction
-    fprintf(file, "%d\n", history_count);
-    for (int i = 0; i < history_count; i++) {
-        if (history_array[i]) {
-            fprintf(file, "%s\n", history_array[i]);
-        }
-    }
+//     // Save history array for easy reconstruction
+//     fprintf(file, "%d\n", history_count);
+//     for (int i = 0; i < history_count; i++) {
+//         if (history_array[i]) {
+//             fprintf(file, "%s\n", history_array[i]);
+//         }
+//     }
     
-    fclose(file);
-}
+//     fclose(file);
+// }
 
 #pragma region INITIALIZATION_FUNCS
 
@@ -72,6 +165,9 @@ static void initialize_autocomplete_from_stdin(void) {
     command_trie = trie_create();
     if (!command_trie) return;
     
+    init_storage_paths();
+    ensure_data_directory();
+
     // Try to load from cache first
     int cache_count = 0;
     FILE* file = fopen(TRIE_DATA_FILE, "r");
@@ -109,6 +205,9 @@ static void initialize_autocomplete_from_cache(void) {
 
     command_trie = trie_create();
     if (!command_trie) return;
+
+    init_storage_paths();
+    ensure_data_directory();
 
     load_trie_from_file();
     fprintf(stderr, "[DEBUG] initialize_autocomplete_from_cache: commands=%d\n", command_trie->total_commands);
@@ -159,48 +258,48 @@ int load_history_from_stdin(void) {
 }
 
 // Load trie data from persistent file
-void load_trie_from_file(void) {
-    FILE* file = fopen(TRIE_DATA_FILE, "r");
-    if (!file) return;
+// void load_trie_from_file(void) {
+//     FILE* file = fopen(TRIE_DATA_FILE, "r");
+//     if (!file) return;
     
-    char line[2048];
+//     char line[2048];
     
-    // Read count
-    if (fgets(line, sizeof(line), file)) {
-        history_count = atoi(line);
+//     // Read count
+//     if (fgets(line, sizeof(line), file)) {
+//         history_count = atoi(line);
         
-        if (history_count > 0) {
-            history_array = malloc(history_count * sizeof(char*));
-            if (!history_array) {
-                fclose(file);
-                return;
-            }
+//         if (history_count > 0) {
+//             history_array = malloc(history_count * sizeof(char*));
+//             if (!history_array) {
+//                 fclose(file);
+//                 return;
+//             }
             
-            // Read history entries and rebuild trie
-            int loaded = 0;
-            while (fgets(line, sizeof(line), file) && loaded < history_count) {
-                // Remove newline
-                size_t len = strlen(line);
-                if (len > 0 && line[len-1] == '\n') {
-                    line[len-1] = '\0';
-                }
+//             // Read history entries and rebuild trie
+//             int loaded = 0;
+//             while (fgets(line, sizeof(line), file) && loaded < history_count) {
+//                 // Remove newline
+//                 size_t len = strlen(line);
+//                 if (len > 0 && line[len-1] == '\n') {
+//                     line[len-1] = '\0';
+//                 }
                 
-                if (strlen(line) > 0) {
-                    history_array[loaded] = strdup(line);
-                    trie_insert(command_trie, line);
-                    loaded++;
-                }
-            }
+//                 if (strlen(line) > 0) {
+//                     history_array[loaded] = strdup(line);
+//                     trie_insert(command_trie, line);
+//                     loaded++;
+//                 }
+//             }
             
-            history_count = loaded;
-#ifdef DEBUG
-            printf("DEBUG: Loaded %d commands from cache\n", history_count);
-#endif
-        }
-    }
+//             history_count = loaded;
+// #ifdef DEBUG
+//             printf("DEBUG: Loaded %d commands from cache\n", history_count);
+// #endif
+//         }
+//     }
     
-    fclose(file);
-}
+//     fclose(file);
+// }
 
 // Filter history array by prefix
 void filter_history_by_prefix(const char* prefix) {
