@@ -2,10 +2,10 @@
 CC = gcc
 CFLAGS = -O2
 
-all: hello
+all: autocomplete
 
-hello: hello.c
-	$(CC) $(CFLAGS) -o hello hello.c
+autocomplete: autocomplete.c
+	$(CC) $(CFLAGS) -o autocomplete autocomplete.c
 
 clean:
-	rm -f hello 
+	rm -f autocomplete 

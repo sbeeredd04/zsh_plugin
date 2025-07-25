@@ -2,14 +2,15 @@
 
 # Path to the C binary (adjust if needed)
 ZSH_PLUGIN_DIR="${0:A:h}"
-ZSH_PLUGIN_BIN="$ZSH_PLUGIN_DIR/hello"
+ZSH_AUTOCOMPLETE_BIN="$ZSH_PLUGIN_DIR/autocomplete"
 
-hello_widget() {
+autocomplete_widget() {
   # Optionally pass $LBUFFER to the C program for more advanced use
   local output
-  output="$($ZSH_PLUGIN_BIN)"
+  output="$($ZSH_AUTOCOMPLETE_BIN)"
   LBUFFER+="$output"
 }
 
-zle -N hello_widget
-bindkey '^x^h' hello_widget  # Ctrl-x Ctrl-h 
+zle -N autocomplete_widget
+bindkey '^[[A' autocomplete_widget  # up arrow for navigation
+bindkey '^[[B' autocomplete_widget  # down arrow for navigation
