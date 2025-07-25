@@ -1,0 +1,14 @@
+#data directory
+data/
+
+#all binaries
+autocomplete
+
+#all object files
+*.o
+
+#all compiled files
+*.so
+
+#all compiled files
+.vscode/

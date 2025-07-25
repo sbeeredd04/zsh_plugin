@@ -1,88 +1,203 @@
-# plugin.zsh - Zsh Autocomplete Plugin with Real History
+# plugin.zsh - Simplified Zsh Autocomplete Plugin
 
 # Path to the C binary
 ZSH_PLUGIN_DIR="${0:A:h}"
 ZSH_AUTOCOMPLETE_BIN="$ZSH_PLUGIN_DIR/autocomplete"
 
-# Global variable to track history navigation state
+# Global state variables
+typeset -g ZSH_CURRENT_PREFIX=""
 typeset -g ZSH_HISTORY_INDEX=0
+typeset -g ZSH_GHOST_TEXT=""
+# One-time initialization flag
+typeset -g ZSH_AUTOCOMPLETE_INITIALIZED=0
+
+# Ensure the C autocomplete backend is initialized only once per session
+ensure_autocomplete_initialized() {
+    if [[ $ZSH_AUTOCOMPLETE_INITIALIZED -eq 0 ]]; then
+        get_zsh_history | $ZSH_AUTOCOMPLETE_BIN init >/dev/null 2>&1
+        ZSH_AUTOCOMPLETE_INITIALIZED=1
+    fi
+}
 
 # Function to get zsh history
 get_zsh_history() {
-    # Use fc to get the full history, reverse it so newest is first
-    # Remove the line numbers and just get the commands
-    # Use tail -r for macOS compatibility (instead of tac)
-    fc -l 1 | awk '{$1=""; print substr($0,2)}' | tail -r
+    # Handles both extended and simple Zsh history formats
+    awk -F';' '{print $2 ? $2 : $1}' ~/.zsh_history
 }
 
-# Widget for up arrow (previous/older command)
+# Debug: Show how many lines are being piped to autocomplete
+zsh_history_count() {
+    get_zsh_history | wc -l
+}
+
+# Get and display ghost text for current buffer
+update_ghost_text() {
+    local current_buffer="$LBUFFER"
+    
+    # Don't show ghost text for very short prefixes
+    if [[ ${#current_buffer} -lt 2 ]]; then
+        ZSH_GHOST_TEXT=""
+        return
+    fi
+    
+    # Ensure backend initialized
+    ensure_autocomplete_initialized
+
+    # Get ghost text from C program (no history piped)
+    local ghost_result
+    ghost_result="$($ZSH_AUTOCOMPLETE_BIN ghost "$current_buffer" 2>/dev/null)"
+    
+    if [[ -n "$ghost_result" && "$ghost_result" != "$current_buffer" ]]; then
+        # Extract the completion part (remove the prefix)
+        local prefix_len=${#current_buffer}
+        ZSH_GHOST_TEXT="${ghost_result:$prefix_len}"
+        
+        # Display ghost text in dim style (this would need terminal support)
+        # For now, we'll just store it for right arrow acceptance
+    else
+        ZSH_GHOST_TEXT=""
+    fi
+}
+
+# Widget for right arrow (accept ghost text completion)
+accept_ghost_completion() {
+    if [[ -n "$ZSH_GHOST_TEXT" ]]; then
+        # Accept the ghost text completion
+        LBUFFER+="$ZSH_GHOST_TEXT"
+        CURSOR=${#LBUFFER}
+        
+        # Clear ghost text and get new completion
+        ZSH_GHOST_TEXT=""
+        update_ghost_text
+    else
+        # No ghost text, perform normal right arrow behavior
+        if [[ $CURSOR -lt ${#BUFFER} ]]; then
+            CURSOR=$((CURSOR + 1))
+        fi
+    fi
+}
+
+# Widget for up arrow (navigate filtered history)
 autocomplete_up_widget() {
-    local output
+    local current_buffer="$LBUFFER"
+    if [[ "$current_buffer" != "$ZSH_CURRENT_PREFIX" ]]; then
+        ZSH_CURRENT_PREFIX="$current_buffer"
+        ZSH_HISTORY_INDEX=0
+    fi
+    ensure_autocomplete_initialized
+    local count=$(zsh_history_count)
+    echo "[DEBUG] Up arrow: using backend trie with $count history lines (prefix='$current_buffer')" >&2
     local result
-    local new_index
-    
-    # Pass current buffer, direction, and current index to C program
-    result="$(get_zsh_history | $ZSH_AUTOCOMPLETE_BIN "$LBUFFER" "up" "$ZSH_HISTORY_INDEX")"
-    
+    result="$($ZSH_AUTOCOMPLETE_BIN history "$current_buffer" "up" "$ZSH_HISTORY_INDEX" 2>>/tmp/autocomplete_debug.log)"
     if [[ -n "$result" ]]; then
-        # Parse the result (command|index)
-        output="${result%|*}"     # Everything before the last |
-        new_index="${result##*|}" # Everything after the last |
-        
-        # Update global index
+        local output="${result%|*}"
+        local new_index="${result##*|}"
         ZSH_HISTORY_INDEX="$new_index"
-        
-        # Replace entire line with history entry
         LBUFFER="$output"
         RBUFFER=""
-        # Move cursor to end of line
         CURSOR=${#LBUFFER}
+        ZSH_GHOST_TEXT=""
+    else
+        zle up-line-or-history
     fi
 }
 
-# Widget for down arrow (next/newer command)
+# Widget for down arrow (navigate filtered history)
 autocomplete_down_widget() {
-    local output
+    local current_buffer="$LBUFFER"
+    if [[ "$current_buffer" != "$ZSH_CURRENT_PREFIX" ]]; then
+        ZSH_CURRENT_PREFIX="$current_buffer"
+        ZSH_HISTORY_INDEX=0
+    fi
+    ensure_autocomplete_initialized
+    local count=$(zsh_history_count)
+    echo "[DEBUG] Down arrow: using backend trie with $count history lines (prefix='$current_buffer')" >&2
     local result
-    local new_index
-    
-    # Pass current buffer, direction, and current index to C program
-    result="$(get_zsh_history | $ZSH_AUTOCOMPLETE_BIN "$LBUFFER" "down" "$ZSH_HISTORY_INDEX")"
-    
+    result="$($ZSH_AUTOCOMPLETE_BIN history "$current_buffer" "down" "$ZSH_HISTORY_INDEX" 2>/dev/null)"
     if [[ -n "$result" ]]; then
-        # Parse the result (command|index)
-        output="${result%|*}"     # Everything before the last |
-        new_index="${result##*|}" # Everything after the last |
-        
-        # Update global index
+        local output="${result%|*}"
+        local new_index="${result##*|}"
         ZSH_HISTORY_INDEX="$new_index"
-        
-        # Replace entire line with history entry
         LBUFFER="$output"
         RBUFFER=""
-        # Move cursor to end of line
         CURSOR=${#LBUFFER}
+        ZSH_GHOST_TEXT=""
+    else
+        zle down-line-or-history
     fi
 }
 
-# Reset index when user starts typing a new command
-reset_history_index() {
+# Widget for regular typing (updates ghost text)
+self_insert_with_ghost() {
+    # Perform normal character insertion
+    zle self-insert
+    
+    # Reset prefix tracking since buffer changed
+    ZSH_CURRENT_PREFIX=""
     ZSH_HISTORY_INDEX=0
+    
+    # Update ghost text
+    update_ghost_text
 }
 
-# Register the widgets
+# Widget for backspace (updates ghost text)
+backward_delete_char_with_ghost() {
+    # Perform normal backspace
+    zle backward-delete-char
+    
+    # Reset prefix tracking since buffer changed
+    ZSH_CURRENT_PREFIX=""
+    ZSH_HISTORY_INDEX=0
+    
+    # Update ghost text
+    update_ghost_text
+}
+
+# Widget for enter key (execute command and update usage)
+accept_line_with_update() {
+    local command_to_execute="$LBUFFER"
+    
+    # Update command usage statistics if we have a command
+    if [[ -n "$command_to_execute" ]]; then
+        ensure_autocomplete_initialized
+        ($ZSH_AUTOCOMPLETE_BIN update "" "$command_to_execute" >/dev/null 2>&1 &)
+    fi
+    
+    # Reset state for new command
+    ZSH_CURRENT_PREFIX=""
+    ZSH_HISTORY_INDEX=0
+    ZSH_GHOST_TEXT=""
+    
+    # Execute the command
+    zle accept-line
+}
+
+# Register widgets
 zle -N autocomplete_up_widget
-zle -N autocomplete_down_widget
-zle -N reset_history_index
+zle -N autocomplete_down_widget  
+zle -N accept_ghost_completion
+zle -N self_insert_with_ghost
+zle -N backward_delete_char_with_ghost
+zle -N accept_line_with_update
 
-# Bind to up and down arrow keys
-# Note: This overrides the default zsh history navigation
-bindkey '^[[A' autocomplete_up_widget    # Up arrow
-bindkey '^[[B' autocomplete_down_widget  # Down arrow
+# Bind keys to widgets
+bindkey '^[[A' autocomplete_up_widget     # Up arrow
+bindkey '^[[B' autocomplete_down_widget   # Down arrow
+bindkey '^[[C' accept_ghost_completion    # Right arrow
+bindkey '^[OA' autocomplete_up_widget     # Up arrow (alternative)
+bindkey '^[OB' autocomplete_down_widget   # Down arrow (alternative)
+bindkey '^[OC' accept_ghost_completion    # Right arrow (alternative)
 
-# Alternative bindings for different terminal types
-bindkey '^[OA' autocomplete_up_widget    # Up arrow (alternative)
-bindkey '^[OB' autocomplete_down_widget  # Down arrow (alternative)
+# Bind enter key to update usage
+bindkey '^M' accept_line_with_update      # Enter key
 
-# Reset index when user executes a command or starts fresh
-bindkey '^M' reset_history_index  # Enter key - reset for new command
+# Bind typing to update ghost text
+bindkey '^?' backward_delete_char_with_ghost  # Backspace
+
+# Bind regular characters to update ghost text
+for char in {a..z} {A..Z} {0..9} ' ' '-' '_' '=' '+' '[' ']' '{' '}' '|' '\' ':' ';' '"' "'" '<' '>' ',' '.' '?' '/' '~' '`' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')'; do
+    bindkey "$char" self_insert_with_ghost
+done
+
+echo "Zsh Autocomplete Plugin loaded successfully"
+echo "Features: Ghost text completion, Trie-based history navigation, Persistent storage"
