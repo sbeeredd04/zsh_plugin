@@ -78,7 +78,7 @@ backward_delete_char_with_ghost() {
 autocomplete_navigation() {
   local dir=$1 buf=$LBUFFER
 
-  # stash prefix on first arrow‐press
+  # stash prefix on first arrow‑press
   if [[ $buf != $ZSH_CURRENT_PREFIX ]]; then
     ZSH_CURRENT_PREFIX=$buf
     ZSH_HISTORY_INDEX=0
@@ -133,6 +133,9 @@ bindkey '\e[B' autocomplete_down_widget
 # Left → real cursor‑move
 bindkey '\e[D' backward-char
 
+# Tab → default filename/word completion
+bindkey '^I' complete-word
+
 # ↩ → update + accept
 bindkey '^M' accept_line_and_update
 
@@ -145,3 +148,4 @@ for key in {a..z} {A..Z} {0..9} ' ' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' \
 do
   bindkey "$key" self_insert_with_ghost
 done
+  
