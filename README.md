@@ -241,5 +241,7 @@ This version focuses on:
 
 Ready to supercharge your command line productivity!
 
-## To Implement 
+## Need To Implement 
 - Default bindings for left and right arrow keys for character and string navigation
+- Commands with && functions should stay together when concatenating to the history
+- Ghost text coloring

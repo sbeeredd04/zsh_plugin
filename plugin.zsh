@@ -1,4 +1,5 @@
 # plugin.zsh — Simplified Zsh Autocomplete Plugin
+autoload -Uz colors && colors
 
 # — Path to the C autocomplete binary —
 ZSH_PLUGIN_DIR="${0:A:h}"

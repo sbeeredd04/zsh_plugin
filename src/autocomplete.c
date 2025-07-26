@@ -476,7 +476,7 @@ int main(int argc, char *argv[]) {
     char* operation = argv[1];
     char* current_buffer = (argc > 2) ? argv[2] : "";
     char* param3 = (argc > 3) ? argv[3] : "";
-    fprintf(stderr, "[DEBUG] operation='%s', current_buffer='%s', param3='%s'\n", operation, current_buffer, param3);
+    
     // Initialise system differently depending on operation so we don't block on stdin.
     if (strcmp(operation, "init") == 0) {
         initialize_autocomplete_from_stdin();
@@ -505,12 +505,9 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(operation, "update") == 0) {
         // Update command usage
         update_command_usage(param3);
-        printf("updated");
     } else if (strcmp(operation, "init") == 0) {
         // Just initialize (already done above)
-        printf("initialized");
     } else {
-        printf("Unknown operation: %s\n", operation);
         cleanup_autocomplete();
         return 1;
     }
