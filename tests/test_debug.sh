@@ -2,7 +2,7 @@
 
 # test_debug.sh - Test script to simulate autocomplete navigation
 
-echo "🧪 Testing Autocomplete Navigation with Debug Output"
+echo "Testing Autocomplete Navigation with Debug Output"
 echo "================================================="
 
 # Sample history
@@ -11,11 +11,11 @@ git status
 make clean
 history"
 
-echo "📋 Sample History:"
+echo "Sample History:"
 echo "$HISTORY"
 echo ""
 
-echo "🔄 Simulating Navigation Sequence:"
+echo "Simulating Navigation Sequence:"
 echo "1. User types: 'git commit'"
 echo "2. Press UP arrow (should get first history item)"
 echo "3. Press UP arrow again (should get second history item)"  
@@ -68,5 +68,5 @@ INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
 echo ""
-echo "🎯 Expected: Final buffer should be 'git commit' (original user input)"
-echo "✅ Test complete!" 
+echo "Expected: Final buffer should be 'git commit' (original user input)"
+echo "Test complete!" 

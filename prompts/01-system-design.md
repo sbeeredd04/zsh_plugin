@@ -15,84 +15,74 @@
 
 ### High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         User Interface                           │
-│                    (Zsh Terminal Session)                        │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Key Events
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│                        Zsh Plugin Layer                          │
-│                        (plugin.zsh)                              │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │   Widgets    │  │ Key Bindings │  │ Ghost Render │         │
-│  │              │  │              │  │              │         │
-│  │ - self_insert│  │ ↑/↓ → history│  │ - RBUFFER    │         │
-│  │ - backspace  │  │ → → accept   │  │ - redisplay  │         │
-│  │ - accept_line│  │ Tab → complete│  │              │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Process Invocation
-                             │ (stdin/stdout pipe)
-┌────────────────────────────▼────────────────────────────────────┐
-│                    C Processing Layer                            │
-│                    (autocomplete binary)                         │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              Operation Dispatcher                         │  │
-│  │  - init    : Initialize from stdin                       │  │
-│  │  - ghost   : Get best completion for prefix              │  │
-│  │  - history : Navigate filtered history                   │  │
-│  │  - update  : Update command frequency                    │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                  Core Logic                               │  │
-│  │  - load_history_from_stdin()                             │  │
-│  │  - filter_history_by_prefix()                            │  │
-│  │  - get_ghost_text()                                      │  │
-│  │  - navigate_filtered_history()                           │  │
-│  │  - update_command_usage()                                │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Read/Write
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│                      Data Structure Layer                        │
-│                      (trie.c, trie.h)                           │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                    Trie Operations                        │  │
-│  │  - trie_create()                                         │  │
-│  │  - trie_insert()                                         │  │
-│  │  - trie_search()                                         │  │
-│  │  - trie_get_best_completion()                           │  │
-│  │  - trie_update_frequency()                              │  │
-│  │  - trie_destroy()                                       │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Persistence
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│                       Storage Layer                              │
-│                 ~/.cache/zsh-autocomplete/                      │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │               trie_data.txt                               │  │
-│  │                                                           │  │
-│  │  Format: command|frequency|timestamp                     │  │
-│  │  Example:                                                │  │
-│  │    git status|15|1709654321                             │  │
-│  │    git commit -m|8|1709654290                           │  │
-│  │    make clean|3|1709650000                              │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[User Interface<br/>Zsh Terminal Session] --> B[Zsh Plugin Layer<br/>plugin.zsh]
+    B --> C[C Processing Layer<br/>autocomplete binary]
+    C --> D[Data Structure Layer<br/>trie.c, trie.h]
+    D --> E[Storage Layer<br/>~/.cache/zsh-autocomplete/]
+    
+    B -->|Key Events| B
+    B -->|Process Invocation<br/>stdin/stdout pipe| C
+    C -->|Read/Write| D
+    D -->|Persistence| E
+    
+    subgraph Widgets [Zsh Plugin Widgets]
+        B1[self_insert]
+        B2[backspace]
+        B3[accept_line]
+    end
+    
+    subgraph Keys [Key Bindings]
+        K1[↑/↓ → history]
+        K2[→ → accept]
+        K3[Tab → complete]
+    end
+    
+    subgraph Ghost [Ghost Render]
+        G1[RBUFFER]
+        G2[redisplay]
+    end
+    
+    B --> Widgets
+    B --> Keys
+    B --> Ghost
+    
+    subgraph Operations [Operation Dispatcher]
+        O1[init: Initialize from stdin]
+        O2[ghost: Get best completion]
+        O3[history: Navigate filtered]
+        O4[update: Update frequency]
+    end
+    
+    C --> Operations
+    
+    subgraph Core [Core Logic]
+        L1[load_history_from_stdin]
+        L2[filter_history_by_prefix]
+        L3[get_ghost_text]
+        L4[navigate_filtered_history]
+        L5[update_command_usage]
+    end
+    
+    Operations --> Core
+    
+    subgraph Trie [Trie Operations]
+        T1[trie_create]
+        T2[trie_insert]
+        T3[trie_search]
+        T4[trie_get_best_completion]
+        T5[trie_update_frequency]
+        T6[trie_destroy]
+    end
+    
+    D --> Trie
+    
+    subgraph Storage [Storage Format]
+        S1[trie_data.txt<br/>Format: command|frequency|timestamp]
+    end
+    
+    E --> Storage
 ```
 
 ---
@@ -125,34 +115,30 @@ TrieNode (size ≈ 1040 bytes per node)
 ```
 
 **Example Trie for ["git", "git status", "go"]**:
-```
-                root
-               /    \
-              g      ...
-             / \
-            i   o
-           /     \
-          t*      *
-         /       (end: "go")
-        ' '
-       /
-      s
-     /
-    t
-   /
-  a
- /
-t
-|
-u
-|
-s
-|
-*
-(end: "git status")
 
-* = is_end_of_word = true
+```mermaid
+graph TD
+    root((root))
+    root --> g1((g))
+    g1 --> i((i))
+    g1 --> o((o))
+    i --> t1((t*<br/>git))
+    o --> end1((*<br/>go))
+    t1 --> space((" "))
+    space --> s((s))
+    s --> t2((t))
+    t2 --> a((a))
+    a --> t3((t))
+    t3 --> u((u))
+    u --> s2((s))
+    s2 --> end2((*<br/>git status))
+    
+    style t1 fill:#90EE90
+    style end1 fill:#90EE90
+    style end2 fill:#90EE90
 ```
+
+Note: Nodes marked with `*` have `is_end_of_word = true`
 
 ### 2. Trie (`Trie`)
 
@@ -302,15 +288,25 @@ trie_get_best_completion(trie, "git st");
 ```
 
 **Indexing Strategy**:
-```
-filtered_history = ["cmd1", "cmd2", "cmd3"]  (oldest to newest)
-                    ↑                   ↑
-                  index 0            index 2
 
-User navigation: -1 → 0 → 1 → 2 → -1
-Display order:  original → cmd3 → cmd2 → cmd1 → original
-                          (newest)      (oldest)
+```mermaid
+flowchart LR
+    A[filtered_history array<br/>oldest to newest] --> B[cmd1<br/>index 0]
+    A --> C[cmd2<br/>index 1]
+    A --> D[cmd3<br/>index 2]
+    
+    E[User navigation] --> F[-1: original]
+    F --> G[0: cmd3 newest]
+    G --> H[1: cmd2]
+    H --> I[2: cmd1 oldest]
+    I --> F
+    
+    style F fill:#FFE4B5
+    style G fill:#90EE90
+    style I fill:#FFB6C1
 ```
+
+Display order: `original → cmd3 (newest) → cmd2 → cmd1 (oldest) → original`
 
 ---
 
@@ -388,20 +384,21 @@ ls -la|22|1709654400
 ### Deallocation Strategy
 
 **Cleanup Order**:
-```
-1. cleanup_autocomplete()
-   ├─ trie_destroy(command_trie)
-   │  └─ trie_node_destroy(node)  [recursive]
-   │     ├─ Destroy all 128 children
-   │     ├─ Free full_command string
-   │     └─ Free node itself
-   │
-   ├─ Free history_array entries
-   │  ├─ Free each command string
-   │  └─ Free array itself
-   │
-   ├─ Free filtered_history (pointers only)
-   └─ Free current_prefix
+
+```mermaid
+flowchart TD
+    A[cleanup_autocomplete] --> B[trie_destroy command_trie]
+    B --> C[trie_node_destroy node - recursive]
+    C --> D[Destroy all 128 children]
+    C --> E[Free full_command string]
+    C --> F[Free node itself]
+    
+    A --> G[Free history_array entries]
+    G --> H[Free each command string]
+    G --> I[Free array itself]
+    
+    A --> J[Free filtered_history pointers only]
+    A --> K[Free current_prefix]
 ```
 
 **Memory Leak Prevention**:
