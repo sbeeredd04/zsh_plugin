@@ -2,28 +2,29 @@
 
 A high-performance hybrid Zsh+C autocomplete plugin with **trie-based prefix matching**, **ghost text completion**, and **persistent storage**. Features smart history navigation that filters commands by prefix and learns from your usage patterns.
 
-## ✨ Features
+## Features
 
-- 🔮 **Ghost Text Completion**: Smart suggestions appear as you type
-- 📚 **Prefix-Filtered History**: Navigate only commands matching your prefix
-- 🌳 **Trie Data Structure**: Lightning-fast O(log n) prefix matching
-- 💾 **Persistent Storage**: Commands cached between sessions
-- ⚡ **High Performance**: C-powered processing with minimal overhead
-- 🎯 **Smart Navigation**: Up/down arrows filter by current input
+- **Ghost Text Completion**: Smart suggestions appear as you type with dim gray styling
+- **Prefix-Filtered History**: Navigate only commands matching your prefix
+- **Trie Data Structure**: Lightning-fast O(log n) prefix matching
+- **Persistent Storage**: Commands cached between sessions
+- **High Performance**: C-powered processing with minimal overhead
+- **Smart Navigation**: Up/down arrows filter by current input
+- **Backspace Support**: Cmd+Backspace and Option+Backspace work correctly with ghost text
 
-## 🏗️ Architecture
+## Architecture
 
+```mermaid
+flowchart LR
+    A[Zsh Plugin] <--> B[C Autocomplete]
+    B --> C[Data Structures]
+    
+    A -->|Key bindings<br/>Ghost display<br/>State mgmt| A
+    B -->|Trie matching<br/>Prefix filter<br/>Persistent I/O| B
+    C -->|Trie tree<br/>History cache<br/>File storage| C
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Zsh Plugin    │    │  C Autocomplete  │    │ Data Structures │
-│                 │    │                  │    │                 │
-│ • Key bindings  │◄──►│ • Trie matching  │────│ • Trie tree     │
-│ • Ghost display │    │ • Prefix filter  │    │ • History cache │
-│ • State mgmt    │    │ • Persistent I/O │    │ • File storage   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 zsh_plugin/
@@ -46,7 +47,7 @@ zsh_plugin/
 └── README.md         # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Automatic Installation (Recommended)
 ```bash
@@ -68,7 +69,7 @@ echo "source $(pwd)/plugin.zsh" >> ~/.zshrc
 source ~/.zshrc
 ```
 
-## 💡 How It Works
+## How It Works
 
 ### 1. **Prefix-Based History Navigation**
 - Type any prefix (e.g., `git`)
@@ -87,7 +88,7 @@ source ~/.zshrc
 - Data persisted to `data/trie_data.txt`
 - No re-initialization between sessions
 
-## 🎮 Usage Guide
+## Usage Guide
 
 ### Basic Operations
 - **Type**: Start typing any command prefix
@@ -110,7 +111,7 @@ $ git push           # (press ↑ again)
 $ gi<cursor>         # (back to original)
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Run Basic Tests
 ```bash
@@ -133,7 +134,7 @@ echo -e "ls -la\nps aux" | ./autocomplete history "l" "up" "0"
 echo -e "vim file.txt" | ./autocomplete update "" "vim file.txt"
 ```
 
-## 🔧 Development
+## Development
 
 ### Build Options
 ```bash
@@ -150,7 +151,7 @@ make test     # Run built-in tests
 - **`plugin.zsh`**: Zsh widget bindings and key handlers
 - **`data/trie_data.txt`**: Persistent command cache
 
-## 📊 Performance
+## Performance
 
 ### Benchmarks
 - **Startup Time**: 0ms (uses cached data)
@@ -160,12 +161,12 @@ make test     # Run built-in tests
 - **Storage**: ~50KB cache file for typical usage
 
 ### Scalability
-- ✅ **Unlimited Commands**: Dynamic memory allocation
-- ✅ **Fast Prefix Matching**: O(log n) trie lookups
-- ✅ **Efficient Caching**: Only loads data once per session
-- ✅ **Smart Filtering**: Only shows relevant commands
+- **Unlimited Commands**: Dynamic memory allocation
+- **Fast Prefix Matching**: O(log n) trie lookups
+- **Efficient Caching**: Only loads data once per session
+- **Smart Filtering**: Only shows relevant commands
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -201,7 +202,7 @@ rm -rf data/
 source ~/.zshrc
 ```
 
-## 🎯 Advanced Usage
+## Advanced Usage
 
 ### Custom Prefix Matching
 The system filters history based on exact prefix matching. Commands starting with your typed prefix will appear in navigation.
@@ -225,9 +226,13 @@ SUGGESTION=$(get_completion "git")
 echo "Suggested: $SUGGESTION"
 ```
 
-## 🌟 Key Improvements
+## Recent Improvements
 
-This version focuses on:
+This version includes:
+- **Ghost Text Styling**: Ghost text now appears in dim gray (color fg=8) for clear visual distinction
+- **History Index Reset**: Navigation state properly resets after command execution
+- **Widget Registration Fix**: Widgets are registered before key bindings to prevent errors
+- **Backspace Enhancements**: Added support for Cmd+Backspace and Option+Backspace with ghost text updates
 - **Simplified Architecture**: Removed priority queue complexity
 - **Pure Trie Navigation**: Prefix-based filtering only
 - **Persistent Storage**: No re-initialization overhead
@@ -237,11 +242,4 @@ This version focuses on:
 
 ---
 
-🚀 **Experience intelligent command completion that learns and adapts to your workflow with blazing-fast performance!**
-
-Ready to supercharge your command line productivity!
-
-## Need To Implement 
-- Default bindings for left and right arrow keys for character and string navigation
-- Commands with && functions should stay together when concatenating to the history
-- Ghost text coloring
+Experience intelligent command completion that learns and adapts to your workflow with blazing-fast performance!

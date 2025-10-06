@@ -2,7 +2,7 @@
 
 # test_advanced.sh - Comprehensive test for advanced autocomplete functionality
 
-echo "🧪 Testing Advanced Autocomplete System"
+echo "Testing Advanced Autocomplete System"
 echo "======================================="
 
 # Sample history for testing
@@ -17,11 +17,11 @@ ps aux | grep zsh
 cat README.md
 source ~/.zshrc"
 
-echo "📋 Sample History (10 commands):"
+echo "Sample History (10 commands):"
 echo "$HISTORY"
 echo ""
 
-echo "🔧 Testing Individual Operations:"
+echo "Testing Individual Operations:"
 echo "================================="
 
 # Test 1: Initialization
@@ -89,7 +89,7 @@ RESULT=$(echo "$HISTORY" | ./autocomplete history "$BUFFER" "down" "$INDEX" 2>/d
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
 echo "     Buffer: '$BUFFER', Index: $INDEX"
-echo "     ✅ Expected: '$ORIGINAL_BUFFER', Got: '$BUFFER'"
+echo "     Expected: '$ORIGINAL_BUFFER', Got: '$BUFFER'"
 echo ""
 
 # Test 4: Usage update
@@ -131,7 +131,7 @@ SINGLE_GHOST=$(echo "$HISTORY" | ./autocomplete ghost "g" 2>/dev/null)
 echo "     Result: '$SINGLE_GHOST'"
 echo ""
 
-echo "🎯 Testing Data Structure Functionality:"
+echo "Testing Data Structure Functionality:"
 echo "========================================"
 
 # Test trie functionality
@@ -147,7 +147,7 @@ echo "   Most recently used commands should appear first"
 echo "   Frequency should increase usage priority"
 echo ""
 
-echo "🚀 Integration Test Summary:"
+echo "Integration Test Summary:"
 echo "==========================="
 
 # Count successful operations
@@ -157,53 +157,53 @@ TOTAL_TESTS=6
 # Simple success check based on non-empty results
 if [[ -n "$GHOST" ]]; then
     ((TESTS_PASSED++))
-    echo "   ✅ Ghost text generation: PASSED"
+    echo "   [PASS] Ghost text generation"
 else
-    echo "   ❌ Ghost text generation: FAILED"
+    echo "   [FAIL] Ghost text generation"
 fi
 
 if [[ "$BUFFER" == "$ORIGINAL_BUFFER" ]]; then
     ((TESTS_PASSED++))
-    echo "   ✅ History navigation: PASSED"
+    echo "   [PASS] History navigation"
 else
-    echo "   ❌ History navigation: FAILED"
+    echo "   [FAIL] History navigation"
 fi
 
 if [[ "$UPDATE_RESULT" == "updated" ]]; then
     ((TESTS_PASSED++))
-    echo "   ✅ Usage update: PASSED"
+    echo "   [PASS] Usage update"
 else
-    echo "   ❌ Usage update: FAILED"
+    echo "   [FAIL] Usage update"
 fi
 
 if [[ $DURATION -lt 100 ]]; then  # Less than 100ms
     ((TESTS_PASSED++))
-    echo "   ✅ Performance test: PASSED (${DURATION}ms)"
+    echo "   [PASS] Performance test (${DURATION}ms)"
 else
-    echo "   ❌ Performance test: FAILED (${DURATION}ms)"
+    echo "   [FAIL] Performance test (${DURATION}ms)"
 fi
 
 if [[ -z "$EMPTY_GHOST" && -z "$NONE_GHOST" ]]; then
     ((TESTS_PASSED++))
-    echo "   ✅ Edge cases: PASSED"
+    echo "   [PASS] Edge cases"
 else
-    echo "   ❌ Edge cases: FAILED"
+    echo "   [FAIL] Edge cases"
 fi
 
 if [[ -n "$SINGLE_GHOST" ]]; then
     ((TESTS_PASSED++))
-    echo "   ✅ Single char prefix: PASSED"
+    echo "   [PASS] Single char prefix"
 else
-    echo "   ❌ Single char prefix: FAILED"
+    echo "   [FAIL] Single char prefix"
 fi
 
 echo ""
-echo "📊 Test Results: $TESTS_PASSED/$TOTAL_TESTS tests passed"
+echo "Test Results: $TESTS_PASSED/$TOTAL_TESTS tests passed"
 
 if [[ $TESTS_PASSED -eq $TOTAL_TESTS ]]; then
-    echo "🎉 All tests passed! System is working correctly."
+    echo "All tests passed! System is working correctly."
     exit 0
 else
-    echo "⚠️  Some tests failed. Check the output above for details."
+    echo "Some tests failed. Check the output above for details."
     exit 1
 fi 
