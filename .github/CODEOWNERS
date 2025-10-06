@@ -1,0 +1,31 @@
+# CODEOWNERS - Code Review Ownership Rules
+# This file defines who is responsible for reviewing changes to specific parts of the codebase.
+# The last matching pattern takes precedence.
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+*                           @sbeeredd04
+
+# Core C implementation - requires careful review
+/src/**                     @sbeeredd04
+/include/**                 @sbeeredd04
+
+# Build system and tooling
+/Makefile                   @sbeeredd04
+/scripts/**                 @sbeeredd04
+
+# Zsh plugin integration
+/plugin.zsh                 @sbeeredd04
+
+# Tests - maintainer + test reviewers
+/tests/**                   @sbeeredd04
+
+# Documentation
+/README.md                  @sbeeredd04
+/docs/**                    @sbeeredd04
+
+# GitHub workflows and CI/CD
+/.github/**                 @sbeeredd04
+
+# Prompts and AI-assisted development
+/prompts/**                 @sbeeredd04

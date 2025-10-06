@@ -1,10 +1,35 @@
+/**
+ * @file trie.c
+ * @brief Trie data structure implementation for command prefix matching
+ * 
+ * This file implements a trie (prefix tree) optimized for storing and retrieving
+ * shell commands. Each node can have up to 128 children (ASCII characters) and
+ * stores metadata about command frequency and last usage time.
+ * 
+ * Key features:
+ * - O(k) insertion and search where k = command length
+ * - Automatic prefix sharing for memory efficiency
+ * - Frequency-based ranking for best completion
+ * - Timestamp tracking for recency scoring
+ */
+
 #include "trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-// Create a new trie node
+/**
+ * Create a new trie node with initialized values.
+ * 
+ * All children pointers are set to NULL, and metadata is initialized to default
+ * values. This function is used internally by trie_insert() when building paths.
+ * 
+ * @return Pointer to newly created TrieNode, or NULL if allocation fails
+ * 
+ * @note Caller is responsible for freeing the returned node with trie_node_destroy()
+ * @see trie_node_destroy
+ */
 TrieNode* trie_node_create(void) {
     TrieNode* node = malloc(sizeof(TrieNode));
     if (!node) return NULL;
@@ -60,14 +85,37 @@ void trie_destroy(Trie* trie) {
     free(trie);
 }
 
-// Insert a command into the trie
+/**
+ * Insert a command into the trie with automatic frequency tracking.
+ * 
+ * This function creates a path through the trie for each character in the command.
+ * If a command already exists, its frequency counter is incremented and timestamp
+ * is updated. New nodes are created as needed during traversal.
+ * 
+ * Algorithm:
+ * 1. Validate inputs (trie, command)
+ * 2. Traverse trie character by character
+ * 3. Create nodes for characters that don't exist
+ * 4. Mark final node as end-of-word
+ * 5. Store complete command string
+ * 6. Update frequency and timestamp
+ * 
+ * @param trie     Pointer to the trie structure (must not be NULL)
+ * @param command  Command string to insert (must not be NULL or empty)
+ * 
+ * @note Time complexity: O(k) where k = length of command
+ * @note Space complexity: O(k) in worst case (all new nodes)
+ * @note Thread safety: Not thread-safe, external synchronization required
+ * 
+ * @see trie_update_frequency
+ */
 void trie_insert(Trie* trie, const char* command) {
     if (!trie || !command || strlen(command) == 0) return;
     
     TrieNode* current = trie->root;
     int len = strlen(command);
     
-    // Traverse/create path for each character
+    // Traverse/create path for each character in the command
     for (int i = 0; i < len; i++) {
         unsigned char index = (unsigned char)command[i];
         if (index >= ALPHABET_SIZE) continue;  // Skip invalid characters
