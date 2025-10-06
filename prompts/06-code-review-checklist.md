@@ -44,14 +44,14 @@ Ensure code quality, maintainability, and consistency through systematic code re
 **Example Review Comments**:
 
 ```c
-// ❌ Missing NULL check
+// [NOT DONE] Missing NULL check
 char* get_completion(const char* prefix) {
     return trie_get_best_completion(trie, prefix);
 }
 
 // 💬 Review comment: "What if trie is NULL? Should we check and return NULL?"
 
-// ✅ Fixed
+// [DONE] Fixed
 char* get_completion(const char* prefix) {
     if (!trie || !prefix) {
         return NULL;
@@ -72,7 +72,7 @@ char* get_completion(const char* prefix) {
 **Example Review Comments**:
 
 ```c
-// ❌ Potential memory leak
+// [NOT DONE] Potential memory leak
 char* result = malloc(100);
 if (error) {
     return NULL;  // Memory leak!
@@ -81,7 +81,7 @@ free(result);
 
 // 💬 Review comment: "Memory leak on error path. Please free before return."
 
-// ✅ Fixed
+// [DONE] Fixed
 char* result = malloc(100);
 if (error) {
     free(result);
@@ -101,7 +101,7 @@ free(result);
 **Example Review Comments**:
 
 ```c
-// ❌ O(n²) complexity
+// [NOT DONE] O(n²) complexity
 for (int i = 0; i < count; i++) {
     for (int j = 0; j < count; j++) {
         if (array[i] == array[j] && i != j) {
@@ -112,7 +112,7 @@ for (int i = 0; i < count; i++) {
 
 // 💬 Review comment: "This has O(n²) complexity. Consider using a hash table for O(n)."
 
-// ✅ Fixed with hash table approach
+// [DONE] Fixed with hash table approach
 // (implementation omitted for brevity)
 ```
 
@@ -128,14 +128,14 @@ for (int i = 0; i < count; i++) {
 **Example Review Comments**:
 
 ```c
-// ❌ Poor style
+// [NOT DONE] Poor style
 int f(int a,int b){
 int c=a+b;
 return c;}
 
 // 💬 Review comment: "Please format according to project style (spaces, braces)."
 
-// ✅ Fixed
+// [DONE] Fixed
 int add_numbers(int first, int second) {
     int sum = first + second;
     return sum;
@@ -160,7 +160,7 @@ int divide(int a, int b) {
 
 // 💬 Review comment: "Please add tests for division by zero."
 
-// ✅ Test added
+// [DONE] Test added
 void test_divide() {
     assert(divide(10, 2) == 5);
     assert(divide(7, 3) == 2);
@@ -179,12 +179,12 @@ void test_divide() {
 **Example Review Comments**:
 
 ```c
-// ❌ No documentation
+// [NOT DONE] No documentation
 char* get_best_match(Trie* t, const char* p, int d);
 
 // 💬 Review comment: "Please add function documentation explaining parameters."
 
-// ✅ Fixed
+// [DONE] Fixed
 /**
  * Find the best fuzzy match for a query string.
  *
@@ -205,12 +205,12 @@ char* get_best_match(Trie* t, const char* p, int d);
 **Problem**: Hard-coded values without explanation
 
 ```c
-// ❌ Magic number
+// [NOT DONE] Magic number
 if (score > 1550) {
     return true;
 }
 
-// ✅ Named constant
+// [DONE] Named constant
 #define SCORE_THRESHOLD 1550  // Minimum score for relevance
 if (score > SCORE_THRESHOLD) {
     return true;
@@ -222,7 +222,7 @@ if (score > SCORE_THRESHOLD) {
 **Problem**: Too many nested if/for statements
 
 ```c
-// ❌ Too deeply nested (4 levels)
+// [NOT DONE] Too deeply nested (4 levels)
 if (a) {
     if (b) {
         for (int i = 0; i < n; i++) {
@@ -233,7 +233,7 @@ if (a) {
     }
 }
 
-// ✅ Early returns reduce nesting
+// [DONE] Early returns reduce nesting
 if (!a || !b) return;
 for (int i = 0; i < n; i++) {
     if (!c[i]) continue;
@@ -246,9 +246,9 @@ for (int i = 0; i < n; i++) {
 **Problem**: Functions >100 lines
 
 ```c
-// ❌ 200-line function doing everything
+// [NOT DONE] 200-line function doing everything
 
-// ✅ Split into smaller functions
+// [DONE] Split into smaller functions
 void process_command(const char* cmd) {
     validate_command(cmd);
     parse_command(cmd);
@@ -262,12 +262,12 @@ void process_command(const char* cmd) {
 **Problem**: Ignoring errors or unclear error messages
 
 ```c
-// ❌ Silent failure
+// [NOT DONE] Silent failure
 FILE* f = fopen("file.txt", "r");
 char buffer[100];
 fgets(buffer, 100, f);  // f could be NULL!
 
-// ✅ Proper error handling
+// [DONE] Proper error handling
 FILE* f = fopen("file.txt", "r");
 if (!f) {
     fprintf(stderr, "Error: Cannot open file.txt: %s\n", strerror(errno));
@@ -287,13 +287,13 @@ fclose(f);
 **Problem**: Single-letter or abbreviated names
 
 ```c
-// ❌ Unclear
+// [NOT DONE] Unclear
 int n = get_cnt();
 for (int i = 0; i < n; i++) {
     process(arr[i]);
 }
 
-// ✅ Clear
+// [DONE] Clear
 int command_count = get_command_count();
 for (int i = 0; i < command_count; i++) {
     process_command(commands[i]);
@@ -307,10 +307,10 @@ for (int i = 0; i < command_count; i++) {
 ### Positive Feedback
 
 ```
-✅ "Nice use of const correctness here!"
-✅ "Good edge case handling."
-✅ "Clear and concise function - easy to understand."
-✅ "Excellent documentation!"
+[DONE] "Nice use of const correctness here!"
+[DONE] "Good edge case handling."
+[DONE] "Clear and concise function - easy to understand."
+[DONE] "Excellent documentation!"
 ```
 
 ### Constructive Feedback
@@ -337,7 +337,7 @@ for (int i = 0; i < command_count; i++) {
 ### Input Validation
 
 ```c
-// ✅ Validate all inputs
+// [DONE] Validate all inputs
 void process_command(const char* cmd, size_t max_len) {
     if (!cmd) {
         fprintf(stderr, "Error: NULL command\n");
@@ -357,11 +357,11 @@ void process_command(const char* cmd, size_t max_len) {
 ### Buffer Overflow Prevention
 
 ```c
-// ❌ Unsafe
+// [NOT DONE] Unsafe
 char buffer[100];
 strcpy(buffer, user_input);  // Potential overflow!
 
-// ✅ Safe
+// [DONE] Safe
 char buffer[100];
 strncpy(buffer, user_input, sizeof(buffer) - 1);
 buffer[sizeof(buffer) - 1] = '\0';  // Ensure null termination
@@ -370,10 +370,10 @@ buffer[sizeof(buffer) - 1] = '\0';  // Ensure null termination
 ### Path Traversal Prevention
 
 ```bash
-# ❌ Unsafe
+# [NOT DONE] Unsafe
 cache_file="$user_input/trie_data.txt"
 
-# ✅ Safe
+# [DONE] Safe
 cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh-autocomplete/trie_data.txt"
 # Validate that cache_file doesn't contain ".."
 ```
@@ -405,14 +405,14 @@ cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh-autocomplete/trie_data.txt"
 
 **Example**:
 ```c
-// ❌ Inefficient - allocating in loop
+// [NOT DONE] Inefficient - allocating in loop
 for (int i = 0; i < 1000; i++) {
     char* temp = malloc(100);
     process(temp);
     free(temp);
 }
 
-// ✅ Efficient - single allocation
+// [DONE] Efficient - single allocation
 char* temp = malloc(100);
 for (int i = 0; i < 1000; i++) {
     process(temp);
@@ -426,30 +426,30 @@ free(temp);
 
 ### Required for Approval
 
-1. ✅ **Builds Successfully**
+1. [DONE] **Builds Successfully**
    ```bash
    make clean && make
    # Exit code 0, no errors
    ```
 
-2. ✅ **Tests Pass**
+2. [DONE] **Tests Pass**
    ```bash
    make test
    # All tests pass
    ```
 
-3. ✅ **No Memory Issues**
+3. [DONE] **No Memory Issues**
    ```bash
    valgrind --leak-check=full ./autocomplete ghost "test" < /dev/null
    # No leaks, no errors
    ```
 
-4. ✅ **Code Quality**
+4. [DONE] **Code Quality**
    - Follows style guidelines
    - Appropriate comments
    - Clear function/variable names
 
-5. ✅ **Documentation**
+5. [DONE] **Documentation**
    - Function documentation added
    - README updated (if needed)
    - Changelog updated
@@ -537,7 +537,7 @@ int levenshtein_distance(const char* s1, const char* s2) {
 
 💬 **Comment**: "Please add NULL check after malloc. Also consider a stack-allocated array for small strings to avoid allocation overhead."
 
-✅ **Suggestion**:
+[DONE] **Suggestion**:
 ```c
 // Use stack allocation for small strings
 if (len1 < 100 && len2 < 100) {
@@ -561,7 +561,7 @@ if (strcmp(operation, "fuzzy") == 0) {
 
 💬 **Comment**: "The max distance is hard-coded to 3. Consider making this configurable via environment variable or argument."
 
-✅ **Approved with minor changes**: The fuzzy matching implementation looks solid. Please address the comments above, then this is ready to merge.
+[DONE] **Approved with minor changes**: The fuzzy matching implementation looks solid. Please address the comments above, then this is ready to merge.
 
 ---
 

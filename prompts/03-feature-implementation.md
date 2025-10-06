@@ -315,11 +315,11 @@ int example_function(int param1, char* param2);
 
 **Inline Comments**:
 ```c
-// ✅ Good: Explain WHY, not WHAT
+// [DONE] Good: Explain WHY, not WHAT
 // Use stack-based DFS to avoid recursion depth limits
 stack[stack_top++] = node;
 
-// ❌ Bad: Redundant with code
+// [NOT DONE] Bad: Redundant with code
 // Increment stack_top
 stack_top++;
 ```
@@ -368,14 +368,14 @@ Trie:           O(k)     - Use for prefix matching
 
 **Example**:
 ```c
-// ❌ Bad: Repeated allocations
+// [NOT DONE] Bad: Repeated allocations
 for (int i = 0; i < 1000; i++) {
     char* temp = malloc(100);
     process(temp);
     free(temp);
 }
 
-// ✅ Good: Single allocation
+// [DONE] Good: Single allocation
 char* temp = malloc(100);
 for (int i = 0; i < 1000; i++) {
     process(temp);
@@ -393,13 +393,13 @@ free(temp);
 
 **Example**:
 ```c
-// ❌ Bad: One write per command
+// [NOT DONE] Bad: One write per command
 for (int i = 0; i < count; i++) {
     fprintf(f, "%s\n", commands[i]);
     fflush(f);  // Forces disk write
 }
 
-// ✅ Good: Buffered writes
+// [DONE] Good: Buffered writes
 for (int i = 0; i < count; i++) {
     fprintf(f, "%s\n", commands[i]);
 }
@@ -582,9 +582,9 @@ test_fuzzy_matching() {
 ```markdown
 # In README.md
 
-## ✨ Features
+## Features
 
-- 🔍 **Fuzzy Matching**: Find commands even with typos (up to 3 characters)
+- **Fuzzy Matching**: Find commands even with typos (up to 3 characters)
   - Type "gt sttus" → suggests "git status"
   - Configurable edit distance threshold
   - Optional feature (can be disabled)

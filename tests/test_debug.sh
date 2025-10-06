@@ -30,38 +30,38 @@ echo "Starting with buffer: '$BUFFER', index: $INDEX"
 echo ""
 
 # Test UP navigation
-echo "▲ UP (1): "
+echo "UP (1): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "up" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
-echo "▲ UP (2): "
+echo "UP (2): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "up" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}" 
 INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
-echo "▲ UP (3): "
+echo "UP (3): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "up" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
 # Test DOWN navigation
-echo "▼ DOWN (1): "
+echo "DOWN (1): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "down" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
-echo "▼ DOWN (2): "
+echo "DOWN (2): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "down" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
 echo "   Buffer: '$BUFFER', Index: $INDEX"
 
-echo "▼ DOWN (3): "
+echo "DOWN (3): "
 RESULT=$(echo "$HISTORY" | ./autocomplete "$BUFFER" "down" "$INDEX" 2>/dev/null)
 BUFFER="${RESULT%|*}"
 INDEX="${RESULT##*|}"
