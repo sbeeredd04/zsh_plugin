@@ -13,18 +13,15 @@ The `prompts/` folder serves as a knowledge base for:
 
 ## Structure
 
-```
-prompts/
-├── README.md                           # This file
-├── 00-project-overview.md             # High-level project description
-├── 01-system-design.md                # Comprehensive system architecture
-├── 02-github-setup.md                 # Current task: .github setup
-├── 03-feature-implementation.md       # Feature development guidelines
-├── 04-debugging-guide.md              # Debugging strategies
-├── 05-performance-optimization.md     # Performance improvement guide
-├── 06-code-review-checklist.md        # Code review standards
-└── 07-testing-strategy.md             # Testing best practices
-```
+| File                            | Description                           |
+|---------------------------------|---------------------------------------|
+| README.md                       | This file                             |
+| 00-project-overview.md          | High-level project description        |
+| 01-system-design.md             | Comprehensive system architecture     |
+| 02-github-setup.md              | GitHub repository setup guide         |
+| 03-feature-implementation.md    | Feature development guidelines        |
+| 04-debugging-guide.md           | Debugging strategies                  |
+| 06-code-review-checklist.md     | Code review standards                 |
 
 ## Usage
 

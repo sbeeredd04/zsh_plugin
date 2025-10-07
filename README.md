@@ -49,6 +49,23 @@ zsh_plugin/
 
 ## Quick Start
 
+For detailed installation instructions, see [SETUP.md](SETUP.md).
+
+### Release Package Installation (Easiest)
+
+Download a pre-built release for your platform:
+
+1. Visit the [Releases page](https://github.com/sbeeredd04/zsh_plugin/releases)
+2. Download the appropriate package:
+   - `autocomplete-linux-amd64.tar.gz` for Linux
+   - `autocomplete-macos-arm64.tar.gz` for macOS
+3. Extract and install:
+   ```bash
+   tar -xzf autocomplete-*.tar.gz
+   cd zsh_plugin
+   ./scripts/setup.sh
+   ```
+
 ### Automatic Installation (Recommended)
 ```bash
 # Clone and install

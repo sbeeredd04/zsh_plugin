@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.VERSION }}
     
     steps:
       - name: Checkout repository
@@ -47,6 +50,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,13 +64,30 @@ jobs:
             
             ## Installation
             
+            Download the appropriate package for your platform below and extract it:
+            
             ```bash
-            git clone -b ${{ steps.get_version.outputs.VERSION }} https://github.com/${{ github.repository }}.git
+            # For Linux
+            tar -xzf autocomplete-linux-amd64.tar.gz
+            cd zsh_plugin
+            ./scripts/setup.sh
+            
+            # For macOS
+            tar -xzf autocomplete-macos-arm64.tar.gz
             cd zsh_plugin
             ./scripts/setup.sh
             ```
             
-            See [README.md](README.md) for full documentation.
+            See [SETUP.md](SETUP.md) for detailed installation instructions and [README.md](README.md) for full documentation.
+            
+            ## What's Included
+            
+            - Pre-built autocomplete binary
+            - Zsh plugin integration (plugin.zsh)
+            - Source code (src/ and include/)
+            - Setup script (scripts/setup.sh)
+            - Complete documentation (README.md and SETUP.md)
+            - Makefile for rebuilding if needed
           draft: false
           prerelease: false
 
@@ -102,7 +123,17 @@ jobs:
       
       - name: Package binary
         run: |
-          tar -czf ${{ matrix.asset_name }}.tar.gz autocomplete plugin.zsh README.md scripts/
+          mkdir -p zsh_plugin
+          cp autocomplete zsh_plugin/
+          cp plugin.zsh zsh_plugin/
+          cp README.md zsh_plugin/
+          cp SETUP.md zsh_plugin/
+          cp Makefile zsh_plugin/
+          cp -r scripts zsh_plugin/
+          cp -r src zsh_plugin/
+          cp -r include zsh_plugin/
+          tar -czf ${{ matrix.asset_name }}.tar.gz zsh_plugin/
+          rm -rf zsh_plugin
       
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
