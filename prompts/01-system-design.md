@@ -105,14 +105,15 @@ typedef struct TrieNode {
 ```
 
 **Memory Layout**:
-```
-TrieNode (size ≈ 1040 bytes per node)
-├─ children[128]    : 1024 bytes (128 × 8-byte pointers)
-├─ is_end_of_word   : 1 byte (bool)
-├─ full_command     : 8 bytes (pointer)
-├─ frequency        : 4 bytes (int)
-└─ last_used        : 8 bytes (long)
-```
+
+| Field            | Size (bytes) | Description                    |
+|------------------|--------------|--------------------------------|
+| children[128]    | 1024         | 128 × 8-byte pointers          |
+| is_end_of_word   | 1            | Boolean flag                   |
+| full_command     | 8            | Pointer to command string      |
+| frequency        | 4            | Usage count (int)              |
+| last_used        | 8            | Unix timestamp (long)          |
+| **Total**        | **~1040**    | Approximate size per node      |
 
 **Example Trie for ["git", "git status", "go"]**:
 
