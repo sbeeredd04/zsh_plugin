@@ -3,6 +3,7 @@ data/
 
 #all binaries
 autocomplete
+*.dSYM/
 
 #all object files
 *.o
