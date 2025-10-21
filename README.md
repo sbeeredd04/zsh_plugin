@@ -26,28 +26,43 @@ flowchart LR
 
 ## Repository Structure
 
-```
-zsh_plugin/
-├── src/                    # Source code
-│   ├── autocomplete.c      # Main C program
-│   ├── trie.c             # Trie implementation
-│   └── priority_queue.c   # Priority queue (unused in current version)
-├── include/               # Header files
-│   ├── trie.h
-│   └── priority_queue.h
-├── scripts/              # Utility scripts
-│   └── setup.sh         # Automatic installation
-├── tests/               # Test scripts
-│   └── simple_test.sh   # Basic functionality tests
-├── docs/               # Documentation (if any)
-├── data/              # Runtime data (created automatically)
-│   └── trie_data.txt  # Persistent trie cache
-├── plugin.zsh         # Zsh integration
-├── Makefile          # Build system
-└── README.md         # This file
-```
+| Directory/File      | Description                              |
+|---------------------|------------------------------------------|
+| src/                | C source code                            |
+| src/autocomplete.c  | Main autocomplete program                |
+| src/trie.c          | Trie data structure implementation       |
+| include/            | C header files                           |
+| include/trie.h      | Trie interface definitions               |
+| scripts/            | Utility scripts                          |
+| scripts/setup.sh    | Automatic installation script            |
+| tests/              | Test scripts                             |
+| plugin.zsh          | Zsh integration and widget bindings      |
+| Makefile            | Build system configuration               |
+| README.md           | Project overview (this file)             |
+| SETUP.md            | Detailed installation guide              |
+| RELEASES.md         | Release process documentation            |
+| data/               | Runtime data (created automatically)     |
+| data/trie_data.txt  | Persistent command cache                 |
+| prompts/            | Development documentation and guides     |
 
 ## Quick Start
+
+For detailed installation instructions, see [SETUP.md](SETUP.md).
+
+### Release Package Installation (Easiest)
+
+Download a pre-built release for your platform:
+
+1. Visit the [Releases page](https://github.com/sbeeredd04/zsh_plugin/releases)
+2. Download the appropriate package:
+   - `autocomplete-linux-amd64.tar.gz` for Linux
+   - `autocomplete-macos-arm64.tar.gz` for macOS
+3. Extract and install:
+   ```bash
+   tar -xzf autocomplete-*.tar.gz
+   cd zsh_plugin
+   ./scripts/setup.sh
+   ```
 
 ### Automatic Installation (Recommended)
 ```bash
@@ -239,6 +254,25 @@ This version includes:
 - **Clean Repository Structure**: Organized directories
 - **Robust Error Handling**: Graceful fallbacks
 - **Performance Optimization**: Minimal memory usage
+
+## Contributing
+
+Contributions are welcome! Here's how to get started:
+
+1. **Fork the Repository**: Create your own fork on GitHub
+2. **Clone Your Fork**: `git clone https://github.com/your-username/zsh_plugin.git`
+3. **Create a Branch**: `git checkout -b feature/your-feature`
+4. **Make Changes**: Follow the code style and add tests
+5. **Test Your Changes**: Run `make test` and verify functionality
+6. **Commit**: Use clear commit messages
+7. **Push**: `git push origin feature/your-feature`
+8. **Create Pull Request**: Submit a PR with a clear description
+
+### Development Resources
+
+- **System Design**: See `prompts/01-system-design.md` for architecture details
+- **Feature Guidelines**: See `prompts/03-feature-implementation.md`
+- **Release Process**: See `RELEASES.md` for versioning and release steps
 
 ---
 
