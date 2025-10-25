@@ -21,18 +21,23 @@
             font-family: 'Ubuntu Mono', monospace;
         }
         
-        /* Dark mode styles */
+        /* Remove all underlines */
+        a {
+            text-decoration: none !important;
+        }
+        
+        /* Dark mode styles - using pure black */
         .dark {
-            background-color: #0f172a;
+            background-color: #000000;
             color: #e2e8f0;
         }
         
         .dark .bg-white {
-            background-color: #1e293b !important;
+            background-color: #000000 !important;
         }
         
         .dark .bg-gray-50 {
-            background-color: #0f172a !important;
+            background-color: #000000 !important;
         }
         
         .dark .text-gray-900 {
@@ -48,29 +53,30 @@
         }
         
         .dark .border-gray-200 {
-            border-color: #334155 !important;
+            border-color: #333333 !important;
         }
         
         .dark .card {
-            background: #1e293b;
-            border-color: #334155;
+            background: #111111;
+            border-color: #333333;
         }
         
         .dark .card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1);
         }
         
-        /* Island navigation - modular and isolated */
-        .island-nav {
-            background: white;
-            border-radius: 9999px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
+        /* Floating navbar */
+        .floating-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
         }
         
-        .dark .island-nav {
-            background: #1e293b;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        .dark .floating-nav {
+            background: rgba(17, 17, 17, 0.95);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
         }
         
         .terminal {
@@ -197,62 +203,75 @@
             margin-right: 4px;
             font-size: 0.8em;
         }
+        
+        /* Consistent spacing */
+        .section-spacing {
+            margin-bottom: 80px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .floating-nav {
+                padding: 8px 16px;
+                border-radius: 40px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 transition-colors duration-200">
     
-    <!-- Navigation with Island Architecture -->
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 transition-colors duration-200">
-        <div class="max-w-6xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
+    <!-- Floating Navigation Container -->
+    <div class="fixed top-0 left-0 right-0 z-50 pt-6 pb-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="floating-nav flex items-center justify-between gap-4 flex-wrap md:flex-nowrap">
                 <!-- Logo and Title -->
-                <div class="flex items-center space-x-3">
-                    <span class="material-icons text-3xl text-blue-600">terminal</span>
-                    <div>
-                        <div class="text-xl font-bold text-gray-900">Zsh Autocomplete</div>
+                <div class="flex items-center gap-3">
+                    <span class="material-icons text-2xl md:text-3xl text-blue-600">terminal</span>
+                    <div class="hidden sm:block">
+                        <div class="text-base md:text-xl font-bold text-gray-900 leading-tight">Zsh Autocomplete</div>
                         <div class="text-xs text-gray-500">High-Performance Plugin</div>
                     </div>
                 </div>
                 
-                <!-- Island Navigation Links -->
-                <div class="island-nav flex items-center space-x-2">
-                    <a href="#demo" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center space-x-1 transition-all">
-                        <span class="material-icons text-sm">play_circle_outline</span>
-                        <span class="hidden md:inline">Demo</span>
+                <!-- Navigation Links -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <a href="#demo" class="px-3 md:px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1 transition-all text-sm md:text-base">
+                        <span class="material-icons text-sm md:text-base">play_circle_outline</span>
+                        <span class="hidden lg:inline">Demo</span>
                     </a>
-                    <a href="#download" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center space-x-1 transition-all">
-                        <span class="material-icons text-sm">download</span>
-                        <span class="hidden md:inline">Download</span>
+                    <a href="#download" class="px-3 md:px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1 transition-all text-sm md:text-base">
+                        <span class="material-icons text-sm md:text-base">download</span>
+                        <span class="hidden lg:inline">Download</span>
                     </a>
-                    <a href="#installation" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center space-x-1 transition-all">
-                        <span class="material-icons text-sm">build</span>
-                        <span class="hidden md:inline">Install</span>
+                    <a href="#installation" class="px-3 md:px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1 transition-all text-sm md:text-base">
+                        <span class="material-icons text-sm md:text-base">build</span>
+                        <span class="hidden lg:inline">Install</span>
                     </a>
-                    <a href="#usage" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center space-x-1 transition-all">
-                        <span class="material-icons text-sm">help_outline</span>
-                        <span class="hidden md:inline">Usage</span>
+                    <a href="#usage" class="px-3 md:px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1 transition-all text-sm md:text-base">
+                        <span class="material-icons text-sm md:text-base">help_outline</span>
+                        <span class="hidden lg:inline">Usage</span>
                     </a>
-                    <a href="https://github.com/sbeeredd04/zsh_plugin" target="_blank" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center space-x-1 transition-all">
-                        <span class="material-icons text-sm">open_in_new</span>
-                        <span class="hidden md:inline">GitHub</span>
+                    <a href="https://github.com/sbeeredd04/zsh_plugin" target="_blank" class="px-3 md:px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1 transition-all text-sm md:text-base">
+                        <span class="material-icons text-sm md:text-base">open_in_new</span>
+                        <span class="hidden lg:inline">GitHub</span>
                     </a>
                 </div>
                 
                 <!-- Theme Toggle -->
-                <div class="flex items-center space-x-2">
-                    <span class="material-icons text-sm text-gray-600">light_mode</span>
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-sm text-gray-600 hidden sm:inline">light_mode</span>
                     <div class="theme-toggle" onclick="toggleTheme()" id="theme-toggle"></div>
-                    <span class="material-icons text-sm text-gray-600">dark_mode</span>
+                    <span class="material-icons text-sm text-gray-600 hidden sm:inline">dark_mode</span>
                 </div>
-            </div>
+            </nav>
         </div>
-    </nav>
+    </div>
 
-    <!-- Main Content Container - 75% width, centered -->
-    <main class="w-full max-w-[75%] mx-auto px-6 py-16">
+    <!-- Main Content Container - with top padding for floating nav -->
+    <main class="w-full max-w-[75%] mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
         
         <!-- About Section -->
-        <section class="mb-20">
+        <section class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">info</span>
                 <h2 class="text-2xl font-bold text-gray-900">About</h2>
@@ -295,7 +314,7 @@
         </section>
 
         <!-- Download Section with Prominent Button -->
-        <section id="download" class="mb-20">
+        <section id="download" class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">cloud_download</span>
                 <h2 class="text-2xl font-bold text-gray-900">Download</h2>
@@ -332,7 +351,7 @@
         </section>
 
         <!-- Interactive Demo Section -->
-        <section id="demo" class="mb-20">
+        <section id="demo" class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">play_circle_outline</span>
                 <h2 class="text-2xl font-bold text-gray-900">Interactive Demo</h2>
@@ -398,7 +417,7 @@
         </section>
 
         <!-- Installation Section -->
-        <section id="installation" class="mb-20">
+        <section id="installation" class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">build</span>
                 <h2 class="text-2xl font-bold text-gray-900">Installation</h2>
@@ -459,7 +478,7 @@
         </section>
 
         <!-- Usage Section -->
-        <section id="usage" class="mb-20">
+        <section id="usage" class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">help_outline</span>
                 <h2 class="text-2xl font-bold text-gray-900">How to Use</h2>
@@ -559,7 +578,7 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
         </section>
 
         <!-- Performance Section -->
-        <section class="mb-20">
+        <section class="section-spacing">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-gray-700">speed</span>
                 <h2 class="text-2xl font-bold text-gray-900">Performance</h2>
