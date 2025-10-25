@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zsh Autocomplete Plugin</title>
+    
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ubuntu Mono Font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons from Google CDN -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Ubuntu Mono', monospace;
+        }
+        
+        .terminal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .terminal-header {
+            background: #2d2d2d;
+            padding: 8px 16px;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .terminal-body {
+            padding: 16px;
+            min-height: 120px;
+        }
+        
+        .ghost-text {
+            color: #666;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background: #d4d4d4;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .material-icons {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200">
+        <div class="max-w-5xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="material-icons text-gray-700">terminal</span>
+                    <span class="text-xl font-bold text-gray-900">Zsh Autocomplete Plugin</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#demo" class="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                        <span class="material-icons text-sm">play_circle_outline</span>
+                        <span>Demo</span>
+                    </a>
+                    <a href="#installation" class="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                        <span class="material-icons text-sm">download</span>
+                        <span>Install</span>
+                    </a>
+                    <a href="#usage" class="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                        <span class="material-icons text-sm">help_outline</span>
+                        <span>Usage</span>
+                    </a>
+                    <a href="https://github.com/sbeeredd04/zsh_plugin" target="_blank" class="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                        <span class="material-icons text-sm">open_in_new</span>
+                        <span>GitHub</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-6 py-16">
+        
+        <!-- About Section -->
+        <section class="mb-20">
+            <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-gray-700">info</span>
+                <h2 class="text-2xl font-bold text-gray-900">About</h2>
+            </div>
+            <div class="card rounded-lg p-8">
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    A high-performance hybrid Zsh+C autocomplete plugin with trie-based prefix matching, ghost text completion, and persistent storage. Features smart history navigation that filters commands by prefix and learns from your usage patterns.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500 mt-1">flash_on</span>
+                        <div>
+                            <div class="font-bold text-gray-900">Lightning Fast</div>
+                            <div class="text-gray-600 text-sm">O(log n) trie-based prefix matching with C-powered performance</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500 mt-1">visibility</span>
+                        <div>
+                            <div class="font-bold text-gray-900">Ghost Text</div>
+                            <div class="text-gray-600 text-sm">Smart suggestions appear as you type with dim gray styling</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500 mt-1">filter_list</span>
+                        <div>
+                            <div class="font-bold text-gray-900">Prefix Filtering</div>
+                            <div class="text-gray-600 text-sm">Navigate only commands matching your current prefix</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500 mt-1">save</span>
+                        <div>
+                            <div class="font-bold text-gray-900">Persistent Storage</div>
+                            <div class="text-gray-600 text-sm">Commands cached between sessions for instant startup</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Demo Section -->
+        <section id="demo" class="mb-20">
+            <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-gray-700">play_circle_outline</span>
+                <h2 class="text-2xl font-bold text-gray-900">Interactive Demo</h2>
+            </div>
+            <div class="card rounded-lg p-8">
+                <p class="text-gray-700 mb-6">
+                    Type in the terminal below to see ghost text suggestions in real-time. Try typing "git" or "ls":
+                </p>
+                
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="flex items-center">
+                            <span class="text-green-400">$</span>
+                            <span class="ml-2" id="user-input"></span>
+                            <span class="ghost-text" id="ghost-suggestion"></span>
+                            <span class="cursor" id="cursor"></span>
+                        </div>
+                        <div id="output" class="mt-4 text-gray-400"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500">arrow_upward</span>
+                        <div>
+                            <div class="font-bold text-gray-900 text-sm">Up Arrow</div>
+                            <div class="text-gray-600 text-xs">Previous matching command</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500">arrow_forward</span>
+                        <div>
+                            <div class="font-bold text-gray-900 text-sm">Right Arrow</div>
+                            <div class="text-gray-600 text-xs">Accept ghost suggestion</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="material-icons text-gray-500">keyboard_return</span>
+                        <div>
+                            <div class="font-bold text-gray-900 text-sm">Enter</div>
+                            <div class="text-gray-600 text-xs">Execute command</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation Section -->
+        <section id="installation" class="mb-20">
+            <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-gray-700">download</span>
+                <h2 class="text-2xl font-bold text-gray-900">Get Started</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="card rounded-lg p-8">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="material-icons text-gray-600">auto_awesome</span>
+                        <h3 class="text-lg font-bold text-gray-900">Automatic Installation (Recommended)</h3>
+                    </div>
+                    <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                        <code>git clone https://github.com/sbeeredd04/zsh_plugin.git<br>cd zsh_plugin<br>./scripts/setup.sh</code>
+                    </div>
+                </div>
+                
+                <div class="card rounded-lg p-8">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="material-icons text-gray-600">build</span>
+                        <h3 class="text-lg font-bold text-gray-900">Manual Installation</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-sm text-gray-600 mb-2">Step 1: Build the system</div>
+                            <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                                <code>make clean && make</code>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-600 mb-2">Step 2: Add to your .zshrc</div>
+                            <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                                <code>echo "source $(pwd)/plugin.zsh" >> ~/.zshrc</code>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-600 mb-2">Step 3: Reload shell</div>
+                            <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                                <code>source ~/.zshrc</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Usage Section -->
+        <section id="usage" class="mb-20">
+            <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-gray-700">help_outline</span>
+                <h2 class="text-2xl font-bold text-gray-900">How to Use</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="card rounded-lg p-8">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="material-icons text-gray-600">keyboard</span>
+                        <h3 class="text-lg font-bold text-gray-900">Basic Operations</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="material-icons text-gray-400 text-sm">arrow_upward</span>
+                            <div class="flex-1">
+                                <span class="font-bold text-gray-900">Up Arrow:</span>
+                                <span class="text-gray-700"> Navigate to previous command matching prefix</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="material-icons text-gray-400 text-sm">arrow_downward</span>
+                            <div class="flex-1">
+                                <span class="font-bold text-gray-900">Down Arrow:</span>
+                                <span class="text-gray-700"> Navigate to next command matching prefix</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="material-icons text-gray-400 text-sm">arrow_forward</span>
+                            <div class="flex-1">
+                                <span class="font-bold text-gray-900">Right Arrow:</span>
+                                <span class="text-gray-700"> Accept ghost text completion</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="material-icons text-gray-400 text-sm">keyboard_return</span>
+                            <div class="flex-1">
+                                <span class="font-bold text-gray-900">Enter:</span>
+                                <span class="text-gray-700"> Execute command and update usage statistics</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="material-icons text-gray-400 text-sm">keyboard_tab</span>
+                            <div class="flex-1">
+                                <span class="font-bold text-gray-900">Tab:</span>
+                                <span class="text-gray-700"> Accept ghost text or trigger standard completion</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card rounded-lg p-8">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="material-icons text-gray-600">tips_and_updates</span>
+                        <h3 class="text-lg font-bold text-gray-900">Example Workflow</h3>
+                    </div>
+                    <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                        <code>
+$ gi<span class="text-gray-500">t status</span>          <span class="text-gray-500"># Ghost suggestion appears</span><br>
+<span class="text-gray-500"># Press → to accept or continue typing</span><br><br>
+$ git<span class="text-gray-500"> status</span>         <span class="text-gray-500"># Type "t"</span><br>
+<span class="text-gray-500"># Press ↑ to see history</span><br><br>
+$ git status             <span class="text-gray-500"># From history</span><br>
+$ git commit -m          <span class="text-gray-500"># Press ↑ again</span><br>
+$ git push               <span class="text-gray-500"># Press ↑ again</span><br>
+<span class="text-gray-500"># Press ↓ to navigate back</span>
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card rounded-lg p-8">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="material-icons text-gray-600">settings</span>
+                        <h3 class="text-lg font-bold text-gray-900">How It Works</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="font-bold text-gray-900 mb-2">Prefix-Based History Navigation</div>
+                            <div class="text-gray-700 text-sm">
+                                Type any prefix (e.g., "git") and press ↑/↓ to navigate only commands starting with that prefix. The system remembers your current position in filtered results.
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900 mb-2">Ghost Text Completion</div>
+                            <div class="text-gray-700 text-sm">
+                                As you type, the best matching command appears as a suggestion in dim gray. Press → (right arrow) to accept the ghost text. Suggestions are based on frequency and recency of usage.
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900 mb-2">Persistent Learning</div>
+                            <div class="text-gray-700 text-sm">
+                                All commands are stored in a trie structure for fast retrieval. Frequency tracking ensures better suggestions over time. Data persisted to data/trie_data.txt with no re-initialization between sessions.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Section -->
+        <section class="mb-20">
+            <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-gray-700">speed</span>
+                <h2 class="text-2xl font-bold text-gray-900">Performance</h2>
+            </div>
+            <div class="card rounded-lg p-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">0ms</div>
+                        <div class="text-sm text-gray-600">Startup Time</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">&lt;5ms</div>
+                        <div class="text-sm text-gray-600">Ghost Text Response</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">&lt;10ms</div>
+                        <div class="text-sm text-gray-600">History Filtering</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">~1MB</div>
+                        <div class="text-sm text-gray-600">Memory (1000 cmds)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center text-gray-600">
+            <div class="flex items-center justify-center space-x-2 mb-2">
+                <span class="material-icons text-sm">code</span>
+                <span>Built with TailwindCSS and Ubuntu Mono</span>
+            </div>
+            <div class="flex items-center justify-center space-x-2">
+                <span class="material-icons text-sm">favorite</span>
+                <span>Open source on <a href="https://github.com/sbeeredd04/zsh_plugin" class="text-blue-600 hover:underline" target="_blank">GitHub</a></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Demo Script -->
+    <script>
+        // Sample command history for demo
+        const commandHistory = [
+            'git status',
+            'git add .',
+            'git commit -m "Update files"',
+            'git push origin main',
+            'git pull',
+            'git log --oneline',
+            'git diff',
+            'git branch',
+            'ls -la',
+            'ls -lh',
+            'cd projects',
+            'npm install',
+            'npm start',
+            'npm test',
+            'make clean',
+            'make build',
+            'docker ps',
+            'docker compose up'
+        ];
+
+        const userInputElement = document.getElementById('user-input');
+        const ghostSuggestionElement = document.getElementById('ghost-suggestion');
+        const outputElement = document.getElementById('output');
+        const cursorElement = document.getElementById('cursor');
+        
+        let currentInput = '';
+        let historyIndex = -1;
+        let currentPrefix = '';
+
+        // Find best matching command for ghost text
+        function findGhostSuggestion(input) {
+            if (!input) return '';
+            
+            const matches = commandHistory.filter(cmd => cmd.startsWith(input));
+            if (matches.length > 0) {
+                return matches[0].substring(input.length);
+            }
+            return '';
+        }
+
+        // Find commands matching prefix
+        function findPrefixMatches(prefix) {
+            return commandHistory.filter(cmd => cmd.startsWith(prefix));
+        }
+
+        // Update display
+        function updateDisplay() {
+            userInputElement.textContent = currentInput;
+            const ghost = findGhostSuggestion(currentInput);
+            ghostSuggestionElement.textContent = ghost;
+        }
+
+        // Handle keyboard input
+        document.addEventListener('keydown', (e) => {
+            const terminal = document.querySelector('.terminal-body');
+            if (!terminal) return;
+
+            // Check if we're focused on the page (not an input field)
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            e.preventDefault();
+
+            if (e.key === 'Backspace') {
+                // Backspace
+                currentInput = currentInput.slice(0, -1);
+                historyIndex = -1;
+                updateDisplay();
+            } else if (e.key === 'ArrowRight') {
+                // Accept ghost suggestion
+                const ghost = findGhostSuggestion(currentInput);
+                if (ghost) {
+                    currentInput += ghost;
+                    updateDisplay();
+                }
+            } else if (e.key === 'ArrowUp') {
+                // Navigate history
+                if (currentInput !== currentPrefix) {
+                    currentPrefix = currentInput;
+                    historyIndex = -1;
+                }
+                const matches = findPrefixMatches(currentPrefix);
+                if (matches.length > 0) {
+                    historyIndex = (historyIndex + 1) % matches.length;
+                    currentInput = matches[historyIndex];
+                    updateDisplay();
+                }
+            } else if (e.key === 'ArrowDown') {
+                // Navigate history backward
+                const matches = findPrefixMatches(currentPrefix);
+                if (matches.length > 0 && historyIndex > 0) {
+                    historyIndex = (historyIndex - 1 + matches.length) % matches.length;
+                    currentInput = matches[historyIndex];
+                    updateDisplay();
+                } else if (historyIndex === 0) {
+                    currentInput = currentPrefix;
+                    historyIndex = -1;
+                    updateDisplay();
+                }
+            } else if (e.key === 'Enter') {
+                // Execute command
+                if (currentInput) {
+                    outputElement.innerHTML = `<div class="text-green-400">✓ Executed: ${currentInput}</div>` + outputElement.innerHTML;
+                    currentInput = '';
+                    currentPrefix = '';
+                    historyIndex = -1;
+                    updateDisplay();
+                }
+            } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                // Regular character input
+                currentInput += e.key;
+                historyIndex = -1;
+                updateDisplay();
+            }
+        });
+
+        // Initial display
+        updateDisplay();
+
+        // Add click handler to focus terminal
+        document.querySelector('.terminal-body').addEventListener('click', () => {
+            document.querySelector('.terminal-body').focus();
+        });
+
+        // Show instruction on load
+        setTimeout(() => {
+            outputElement.innerHTML = '<div class="text-blue-400">Type anywhere on the page to interact with the demo terminal</div>';
+        }, 500);
+    </script>
+
+</body>
+</html>
