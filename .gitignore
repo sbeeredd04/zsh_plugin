@@ -12,4 +12,4 @@ autocomplete
 *.so
 
 #all compiled files
-.vscode/
+.vscode/release-package/
