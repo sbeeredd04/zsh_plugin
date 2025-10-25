@@ -504,7 +504,10 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
             } else if (e.key === 'Enter') {
                 // Execute command
                 if (currentInput) {
-                    outputElement.innerHTML = `<div class="text-green-400">✓ Executed: ${currentInput}</div>` + outputElement.innerHTML;
+                    const newDiv = document.createElement('div');
+                    newDiv.className = 'text-green-400';
+                    newDiv.textContent = '✓ Executed: ' + currentInput;
+                    outputElement.insertBefore(newDiv, outputElement.firstChild);
                     currentInput = '';
                     currentPrefix = '';
                     historyIndex = -1;
@@ -528,7 +531,10 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
 
         // Show instruction on load
         setTimeout(() => {
-            outputElement.innerHTML = '<div class="text-blue-400">Type anywhere on the page to interact with the demo terminal</div>';
+            const instructionDiv = document.createElement('div');
+            instructionDiv.className = 'text-blue-400';
+            instructionDiv.textContent = 'Type anywhere on the page to interact with the demo terminal';
+            outputElement.appendChild(instructionDiv);
         }, 500);
     </script>
 
