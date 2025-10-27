@@ -37,7 +37,7 @@ jobs:
           shellcheck scripts/*.sh tests/*.sh || true
       
       - name: Upload analysis reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: static-analysis-reports
           path: |
@@ -109,7 +109,7 @@ jobs:
           lizard src/ -l c --html > complexity-report.html || true
       
       - name: Upload complexity report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: complexity-report
           path: complexity-report.html
