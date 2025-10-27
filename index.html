@@ -397,8 +397,16 @@
             </div>
             <div class="card rounded-lg p-8">
                 <p class="text-gray-700 mb-6">
-                    Type in the terminal below to see <span class="highlight">ghost text suggestions in real-time</span>. Try typing "git" or "ls":
+                    Type in the terminal below to see <span class="highlight">ghost text suggestions in real-time</span>. Try typing commands like <span class="highlight">git</span>, <span class="highlight">npm</span>, <span class="highlight">docker</span>, or <span class="highlight">ls</span>. Use <span class="highlight">↑/↓</span> arrows for prefix-filtered history navigation, <span class="highlight">Tab</span> or <span class="highlight">→</span> to accept suggestions, and type <span class="highlight">clear</span> or press <span class="highlight">Ctrl+L</span> to clear the terminal.
                 </p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                    <div class="flex items-start">
+                        <span class="material-icons text-yellow-600 text-sm mr-2 mt-0.5">info</span>
+                        <p class="text-sm text-yellow-800">
+                            <span class="font-bold">Note:</span> This is a <span class="font-bold">simplified browser simulation</span> to demonstrate the core concepts. The actual Zsh plugin is <span class="font-bold">much more powerful</span>, featuring C-powered trie data structures, persistent storage, frequency-based ranking, and real-time shell integration with sub-millisecond response times.
+                        </p>
+                    </div>
+                </div>
                 
                 <div class="terminal">
                     <div class="terminal-header">
@@ -684,36 +692,139 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
             }
         });
     
-        // Sample command history for demo
+        // Enhanced command history for demo (sorted by frequency/recency)
         const commandHistory = [
+            // Git commands
             'git status',
             'git add .',
+            'git add -A',
             'git commit -m "Update files"',
+            'git commit -m "Fix bug"',
+            'git commit --amend',
             'git push origin main',
+            'git push origin dev',
+            'git push -f origin main',
             'git pull',
+            'git pull origin main',
             'git log --oneline',
+            'git log --graph --oneline --all',
             'git diff',
+            'git diff --staged',
             'git branch',
+            'git branch -a',
+            'git checkout main',
+            'git checkout -b feature',
+            'git merge dev',
+            'git rebase main',
+            'git stash',
+            'git stash pop',
+            'git reset --hard HEAD',
+            'git clone https://github.com/user/repo.git',
+            // Directory navigation
             'ls -la',
             'ls -lh',
+            'ls -ltr',
             'cd projects',
+            'cd ..',
+            'cd ~',
+            'pwd',
+            'mkdir new_folder',
+            'rm -rf temp',
+            'cp file1.txt file2.txt',
+            'mv oldname.txt newname.txt',
+            'cat file.txt',
+            'less file.txt',
+            'head -n 10 file.txt',
+            'tail -f log.txt',
+            'find . -name "*.js"',
+            'grep -r "pattern" .',
+            // NPM commands
             'npm install',
+            'npm install express',
+            'npm install --save-dev jest',
             'npm start',
+            'npm run dev',
             'npm test',
+            'npm run build',
+            'npm run lint',
+            'npm update',
+            'npm audit fix',
+            // Make commands
             'make clean',
             'make build',
+            'make debug',
+            'make test',
+            'make install',
+            'make all',
+            // Docker commands
             'docker ps',
-            'docker compose up'
+            'docker ps -a',
+            'docker images',
+            'docker build -t myapp .',
+            'docker run -it ubuntu bash',
+            'docker compose up',
+            'docker compose up -d',
+            'docker compose down',
+            'docker exec -it container_name bash',
+            'docker logs container_name',
+            'docker stop container_name',
+            'docker rm container_name',
+            // System commands
+            'clear',
+            'history',
+            'top',
+            'htop',
+            'ps aux',
+            'kill -9 1234',
+            'chmod +x script.sh',
+            'sudo apt update',
+            'sudo apt install package',
+            'curl https://example.com',
+            'wget https://example.com/file.zip',
+            'tar -xzf archive.tar.gz',
+            'unzip file.zip',
+            'ssh user@hostname',
+            'scp file.txt user@host:/path',
+            // Python commands
+            'python3 script.py',
+            'python3 -m venv env',
+            'pip install requests',
+            'pip install -r requirements.txt',
+            'pip freeze > requirements.txt',
+            // Other useful commands
+            'vim file.txt',
+            'nano file.txt',
+            'echo "Hello World"',
+            'export PATH=$PATH:/new/path',
+            'source ~/.zshrc',
+            'which python3',
+            'man command'
         ];
         
-        // Simulated command outputs
+        // Simulated command outputs with more variety
         const commandOutputs = {
             'git status': 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean',
-            'git log --oneline': 'a1b2c3d Fix bug in authentication\nd4e5f6g Add new feature\nh7i8j9k Update documentation',
-            'ls -la': 'total 48\ndrwxr-xr-x  12 user  staff   384 Oct 25 12:00 .\ndrwxr-xr-x   6 user  staff   192 Oct 24 10:00 ..\n-rw-r--r--   1 user  staff  1234 Oct 25 11:30 README.md',
-            'npm install': 'added 156 packages in 3.2s',
-            'make build': 'gcc -O2 -Wall -Iinclude -o autocomplete autocomplete.o trie.o\nBuild successful!',
-            'docker ps': 'CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES'
+            'git branch': '* main\n  dev\n  feature/new-feature',
+            'git log --oneline': 'a1b2c3d Fix bug in authentication\nd4e5f6g Add new feature\nh7i8j9k Update documentation\na2b3c4e Initial commit',
+            'git log --graph --oneline --all': '* a1b2c3d (HEAD -> main) Fix bug\n* d4e5f6g Add feature\n* h7i8j9k Update docs',
+            'git diff': 'diff --git a/file.txt b/file.txt\nindex 123..456\n--- a/file.txt\n+++ b/file.txt\n@@ -1,3 +1,4 @@\n+Added line',
+            'ls -la': 'total 48\ndrwxr-xr-x  12 user  staff   384 Oct 25 12:00 .\ndrwxr-xr-x   6 user  staff   192 Oct 24 10:00 ..\n-rw-r--r--   1 user  staff  1234 Oct 25 11:30 README.md\ndrwxr-xr-x   5 user  staff   160 Oct 25 11:00 src',
+            'ls -lh': 'total 48K\n-rw-r--r-- 1 user staff 1.2K Oct 25 11:30 README.md\ndrwxr-xr-x 5 user staff  160 Oct 25 11:00 src',
+            'pwd': '/Users/user/projects/zsh_plugin',
+            'npm install': '✓ added 156 packages in 3.2s\n\n42 packages are looking for funding',
+            'npm start': '> app@1.0.0 start\n> node server.js\n\nServer running on port 3000',
+            'npm test': '> app@1.0.0 test\n> jest\n\nPASS  tests/app.test.js\n✓ should work (5 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       1 passed, 1 total',
+            'npm run build': '> app@1.0.0 build\n> webpack --mode production\n\nasset bundle.js 125 KiB [emitted] [minimized]\nwebpack 5.0.0 compiled successfully in 2341 ms',
+            'make clean': 'rm -f *.o autocomplete\nClean complete!',
+            'make build': 'gcc -O2 -Wall -Iinclude -c src/autocomplete.c\ngcc -O2 -Wall -Iinclude -c src/trie.c\ngcc -O2 -Wall -Iinclude -o autocomplete autocomplete.o trie.o\nBuild successful!',
+            'make test': 'Running tests...\nTest 1: PASSED\nTest 2: PASSED\nAll tests passed!',
+            'docker ps': 'CONTAINER ID   IMAGE          COMMAND       CREATED        STATUS        PORTS                    NAMES\n7f8a9b0c1d2e   nginx:latest   "nginx..."    2 hours ago    Up 2 hours    0.0.0.0:80->80/tcp      webserver',
+            'docker images': 'REPOSITORY    TAG       IMAGE ID       CREATED        SIZE\nnginx         latest    abc123def456   2 weeks ago    142MB\nubuntu        20.04     ghi789jkl012   3 weeks ago    72.8MB',
+            'clear': '',
+            'history': '1  git status\n2  npm install\n3  make build\n4  docker ps',
+            'python3 --version': 'Python 3.11.5',
+            'node --version': 'v18.17.0',
+            'echo "Hello World"': 'Hello World'
         };
 
         const userInputElement = document.getElementById('user-input');
@@ -725,21 +836,44 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
         let historyIndex = -1;
         let currentPrefix = '';
         let executionCount = 0;
+        let prefixMatches = []; // Cache prefix matches for navigation
 
-        // Find best matching command for ghost text
+        // Find best matching command for ghost text (improved)
         function findGhostSuggestion(input) {
             if (!input) return '';
             
+            // Filter commands that start with the input
             const matches = commandHistory.filter(cmd => cmd.startsWith(input));
+            
             if (matches.length > 0) {
+                // Return the remainder of the first match
                 return matches[0].substring(input.length);
             }
             return '';
         }
 
-        // Find commands matching prefix
+        // Find commands matching prefix (with caching)
         function findPrefixMatches(prefix) {
+            if (!prefix) return commandHistory.slice(); // Return all if no prefix
             return commandHistory.filter(cmd => cmd.startsWith(prefix));
+        }
+        
+        // Clear terminal output
+        function clearTerminal() {
+            outputElement.innerHTML = '';
+            currentInput = '';
+            currentPrefix = '';
+            historyIndex = -1;
+            prefixMatches = [];
+            updateDisplay();
+            
+            // Show welcome message after clear
+            setTimeout(() => {
+                const welcomeDiv = document.createElement('div');
+                welcomeDiv.className = 'text-blue-400 text-sm';
+                welcomeDiv.innerHTML = 'Terminal cleared • Type to see suggestions';
+                outputElement.appendChild(welcomeDiv);
+            }, 100);
         }
 
         // Update display
@@ -780,7 +914,7 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
             }
         }
 
-        // Handle keyboard input
+        // Handle keyboard input (enhanced)
         document.addEventListener('keydown', (e) => {
             const terminal = document.querySelector('.terminal-body');
             if (!terminal) return;
@@ -793,15 +927,20 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
             e.preventDefault();
 
             if (e.key === 'Backspace') {
-                // Backspace
+                // Backspace - reset prefix tracking when deleting
                 currentInput = currentInput.slice(0, -1);
                 historyIndex = -1;
+                currentPrefix = '';
+                prefixMatches = [];
                 updateDisplay();
             } else if (e.key === 'Tab') {
                 // Tab - accept ghost suggestion
                 const ghost = findGhostSuggestion(currentInput);
                 if (ghost) {
                     currentInput += ghost;
+                    historyIndex = -1;
+                    currentPrefix = '';
+                    prefixMatches = [];
                     updateDisplay();
                 }
             } else if (e.key === 'ArrowRight') {
@@ -809,45 +948,64 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
                 const ghost = findGhostSuggestion(currentInput);
                 if (ghost) {
                     currentInput += ghost;
+                    historyIndex = -1;
+                    currentPrefix = '';
+                    prefixMatches = [];
                     updateDisplay();
                 }
             } else if (e.key === 'ArrowUp') {
-                // Navigate history
-                if (currentInput !== currentPrefix) {
+                // Navigate history (improved prefix tracking)
+                if (historyIndex === -1) {
+                    // First time pressing up - save current input as prefix
                     currentPrefix = currentInput;
-                    historyIndex = -1;
+                    prefixMatches = findPrefixMatches(currentPrefix);
+                    historyIndex = 0;
+                } else {
+                    // Continue navigating within prefix matches
+                    historyIndex = (historyIndex + 1) % prefixMatches.length;
                 }
-                const matches = findPrefixMatches(currentPrefix);
-                if (matches.length > 0) {
-                    historyIndex = (historyIndex + 1) % matches.length;
-                    currentInput = matches[historyIndex];
+                
+                if (prefixMatches.length > 0) {
+                    currentInput = prefixMatches[historyIndex];
                     updateDisplay();
                 }
             } else if (e.key === 'ArrowDown') {
                 // Navigate history backward
-                const matches = findPrefixMatches(currentPrefix);
-                if (matches.length > 0 && historyIndex > 0) {
-                    historyIndex = (historyIndex - 1 + matches.length) % matches.length;
-                    currentInput = matches[historyIndex];
+                if (historyIndex > 0) {
+                    historyIndex = historyIndex - 1;
+                    currentInput = prefixMatches[historyIndex];
                     updateDisplay();
                 } else if (historyIndex === 0) {
+                    // Return to original prefix
                     currentInput = currentPrefix;
                     historyIndex = -1;
+                    prefixMatches = [];
                     updateDisplay();
                 }
             } else if (e.key === 'Enter') {
                 // Execute command
                 if (currentInput) {
-                    executeCommand(currentInput);
+                    // Check for clear command
+                    if (currentInput.trim() === 'clear') {
+                        clearTerminal();
+                    } else {
+                        executeCommand(currentInput);
+                    }
                     currentInput = '';
                     currentPrefix = '';
                     historyIndex = -1;
+                    prefixMatches = [];
                     updateDisplay();
                 }
+            } else if (e.key === 'l' && e.ctrlKey) {
+                // Ctrl+L - clear terminal (common shortcut)
+                clearTerminal();
             } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-                // Regular character input
+                // Regular character input - reset history navigation
                 currentInput += e.key;
                 historyIndex = -1;
+                currentPrefix = '';
+                prefixMatches = [];
                 updateDisplay();
             }
         });
@@ -860,11 +1018,11 @@ $ git push               <span class="text-gray-500"># Press ↑ again</span><br
             document.querySelector('.terminal-body').focus();
         });
 
-        // Show instruction on load
+        // Show instruction on load (enhanced)
         setTimeout(() => {
             const instructionDiv = document.createElement('div');
             instructionDiv.className = 'text-blue-400 text-sm';
-            instructionDiv.innerHTML = 'Type anywhere on the page to interact • Try: <span class="text-yellow-400">git</span> or <span class="text-yellow-400">ls</span> • Press <span class="tab-indicator">Tab</span> or <span class="tab-indicator">→</span> to accept';
+            instructionDiv.innerHTML = 'Type anywhere on the page to interact • Try: <span class="text-yellow-400">git</span>, <span class="text-yellow-400">npm</span>, <span class="text-yellow-400">docker</span>, or <span class="text-yellow-400">clear</span><br>Press <span class="tab-indicator">Tab</span> or <span class="tab-indicator">→</span> to accept • <span class="tab-indicator">↑/↓</span> for prefix-filtered history • <span class="tab-indicator">Ctrl+L</span> to clear';
             outputElement.appendChild(instructionDiv);
         }, 500);
     </script>
